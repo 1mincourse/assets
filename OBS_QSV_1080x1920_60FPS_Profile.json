@@ -1,0 +1,23 @@
+{
+  "base_resolution": "1080x1920",
+  "output_resolution": "1080x1920",
+  "fps_num": 60,
+  "fps_den": 1,
+  "output_mode": "advanced",
+  "recording": {
+    "type": "standard",
+    "path": "C:/OBS_Recordings",
+    "format": "mkv",
+    "encoder": "obs_qsv11_v2",
+    "bitrate": 8000,
+    "rate_control": "CBR",
+    "keyint_sec": 2,
+    "bframes": false,
+    "profile": "main"
+  },
+  "audio": {
+    "sample_rate": 44100,
+    "bitrate": 128
+  },
+  "scaling_filter": "bilinear"
+}
