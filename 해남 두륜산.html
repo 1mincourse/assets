@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>두륜산 인터랙티브 등산 가이드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Earthen Harmony -->
+    <!-- Application Structure Plan: A single-page dashboard structure with a sticky navigation bar for quick access to key sections. The application starts with a hero section providing at-a-glance information (key stats, time comparison chart). It then breaks down the hike into logical, interactive sections: '코스 개요' for core data, '구간별 안내' with a clickable step-by-step diagram for intuitive understanding of the trail, a tabbed '준비물' section to prevent information overload, and clear cards for seasonal and access information. This task-oriented design allows users (hikers) to quickly find the information they need for planning their trip, which is more effective than a linear text-based report. -->
+    <!-- Visualization & Content Choices: 
+        1. Report Info: Hiking time by skill level. -> Goal: Compare effort levels. -> Viz: Bar Chart (Chart.js Canvas). -> Interaction: Hover tooltips for exact minutes. -> Justification: A bar chart is the clearest visual method for comparing discrete values across different categories, making the difficulty tangible.
+        2. Report Info: Trail progression (Osojae -> Noseungbong -> Garyeonbong). -> Goal: Organize the hike into clear stages. -> Presentation: HTML/CSS vertical step diagram. -> Interaction: Clicking a stage reveals details. -> Justification: A visual, interactive timeline is more engaging and easier to follow than a long paragraph, helping users mentally map their journey.
+        3. Report Info: Extensive gear list. -> Goal: Inform and organize preparation. -> Presentation: Tabbed interface (Basic/Seasonal). -> Interaction: Click tabs to switch content. -> Justification: Separating the long list into context-specific tabs (what you always need vs. what you need in winter) reduces cognitive load and improves usability.
+        4. Report Info: Seasonal features, access, food. -> Goal: Provide supplementary planning info. -> Presentation: Themed info cards. -> Interaction: Static, clear presentation. -> Justification: Simple cards are sufficient for this straightforward, non-comparative information, offering quick scannability.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #1e40af; /* dark blue */
+            border-bottom-color: #1e40af;
+        }
+        .step-item.active .step-content {
+            max-height: 500px;
+            opacity: 1;
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800">
+
+    <div id="app" class="max-w-7xl mx-auto">
+
+        <header class="text-center py-12 md:py-20 px-4 bg-white shadow-sm rounded-b-3xl">
+            <h1 class="text-4xl md:text-5xl font-bold text-blue-900">1분등산 X 해남 두륜산</h1>
+            <p class="mt-4 text-lg md:text-xl text-stone-600">남도의 금강산, 다도해를 품은 기암괴석의 파노라마</p>
+        </header>
+
+        <nav id="navbar" class="sticky top-0 bg-white/80 backdrop-blur-lg z-50 shadow-md">
+            <div class="max-w-5xl mx-auto px-4">
+                <div class="flex justify-center items-center space-x-4 md:space-x-8 h-16 overflow-x-auto">
+                    <a href="#overview" class="nav-link text-stone-600 font-semibold py-2 border-b-2 border-transparent whitespace-nowrap">코스 개요</a>
+                    <a href="#course-guide" class="nav-link text-stone-600 font-semibold py-2 border-b-2 border-transparent whitespace-nowrap">구간별 안내</a>
+                    <a href="#gear" class="nav-link text-stone-600 font-semibold py-2 border-b-2 border-transparent whitespace-nowrap">필수 준비물</a>
+                    <a href="#seasons" class="nav-link text-stone-600 font-semibold py-2 border-b-2 border-transparent whitespace-nowrap">사계절 매력</a>
+                    <a href="#info" class="nav-link text-stone-600 font-semibold py-2 border-b-2 border-transparent whitespace-nowrap">교통 & 정보</a>
+                </div>
+            </div>
+        </nav>
+        
+        <main class="px-4 py-8 md:px-6 md:py-12">
+            
+            <section id="overview" class="scroll-mt-20 mb-16">
+                 <h2 class="text-3xl font-bold text-center mb-2 text-blue-900">한눈에 보는 등산 코스</h2>
+                 <p class="text-center text-stone-600 mb-10">오소재 주차장에서 출발하여 가련봉 정상을 찍고 돌아오는 핵심 원점회귀 코스입니다.</p>
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div class="bg-white p-6 rounded-2xl shadow-lg">
+                        <h3 class="text-xl font-semibold text-center mb-4">예상 소요 시간 (등급별)</h3>
+                        <div class="chart-container">
+                            <canvas id="hikingTimeChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-center">
+                        <div class="bg-white p-6 rounded-2xl shadow-lg">
+                            <span class="text-4xl font-bold text-emerald-600">5.4</span><span class="text-lg ml-1">km</span>
+                            <p class="mt-2 text-stone-500">총 거리</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-lg">
+                             <span class="text-4xl font-bold text-emerald-600">490</span><span class="text-lg ml-1">m</span>
+                            <p class="mt-2 text-stone-500">누적 상승고도</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-lg col-span-1 sm:col-span-2">
+                             <span class="text-3xl font-bold text-amber-600">중급</span>
+                            <p class="mt-2 text-stone-500">난이도 (가파른 오르막/암릉)</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="course-guide" class="scroll-mt-20 mb-16">
+                <h2 class="text-3xl font-bold text-center mb-2 text-blue-900">구간별 상세 안내</h2>
+                <p class="text-center text-stone-600 mb-10">각 구간을 클릭하여 상세 정보를 확인해보세요.</p>
+                <div class="max-w-2xl mx-auto">
+                    <div class="relative pl-8 border-l-2 border-stone-300">
+                        
+                        <div class="mb-8 step-item">
+                            <div class="absolute w-6 h-6 bg-emerald-500 rounded-full -left-3 border-4 border-white"></div>
+                            <div class="pl-4 cursor-pointer">
+                                <h3 class="text-xl font-bold text-emerald-700">1. 산행 시작</h3>
+                                <p class="text-stone-500">오소재 주차장 → 오르막 구간</p>
+                                <div class="step-content overflow-hidden max-h-0 opacity-0 transition-all duration-500 ease-in-out mt-2">
+                                    <p class="text-stone-700 bg-emerald-50 p-4 rounded-lg">초반부터 돌길과 가파른 계단이 이어지는 본격적인 오르막 구간입니다. 꾸준히 오르며 몸을 예열하는 단계입니다.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-8 step-item">
+                            <div class="absolute w-6 h-6 bg-amber-500 rounded-full -left-3 border-4 border-white"></div>
+                            <div class="pl-4 cursor-pointer">
+                                <h3 class="text-xl font-bold text-amber-700">2. 노승봉 도착 📸</h3>
+                                <p class="text-stone-500">첫 번째 하이라이트 & 포토존</p>
+                                <div class="step-content overflow-hidden max-h-0 opacity-0 transition-all duration-500 ease-in-out mt-2">
+                                     <p class="text-stone-700 bg-amber-50 p-4 rounded-lg">정상석 앞 바위는 다도해와 가련봉을 배경으로 한 최고의 사진 명소입니다. 숨을 고르며 멋진 풍경을 담아가세요.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-8 step-item">
+                            <div class="absolute w-6 h-6 bg-rose-500 rounded-full -left-3 border-4 border-white"></div>
+                            <div class="pl-4 cursor-pointer">
+                                <h3 class="text-xl font-bold text-rose-700">3. 암릉 구간 🧗</h3>
+                                <p class="text-stone-500">노승봉 → 가련봉</p>
+                                <div class="step-content overflow-hidden max-h-0 opacity-0 transition-all duration-500 ease-in-out mt-2">
+                                     <p class="text-stone-700 bg-rose-50 p-4 rounded-lg">짜릿한 암릉과 철계단으로 이루어져 산행의 재미를 더해주는 구간입니다. 손과 발을 모두 사용하며 안전하게 이동하세요.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="step-item">
+                            <div class="absolute w-6 h-6 bg-blue-500 rounded-full -left-3 border-4 border-white"></div>
+                            <div class="pl-4 cursor-pointer">
+                                <h3 class="text-xl font-bold text-blue-800">4. 가련봉 정상 (703m) 🏆</h3>
+                                <p class="text-stone-500">최고봉 도착 및 하산</p>
+                                <div class="step-content overflow-hidden max-h-0 opacity-0 transition-all duration-500 ease-in-out mt-2">
+                                     <p class="text-stone-700 bg-blue-50 p-4 rounded-lg">사방이 탁 트인 장엄한 조망이 펼쳐집니다. 완도와 진도까지 보이는 풍경을 감상한 뒤, 왔던 길을 따라 안전하게 하산합니다.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <section id="gear" class="scroll-mt-20 mb-16">
+                 <h2 class="text-3xl font-bold text-center mb-2 text-blue-900">필수 준비물 체크리스트</h2>
+                 <p class="text-center text-stone-600 mb-10">안전하고 즐거운 산행을 위해 꼼꼼히 챙겨주세요.</p>
+
+                <div class="max-w-4xl mx-auto">
+                    <div class="flex justify-center mb-6 border-b border-stone-200">
+                        <button class="gear-tab-btn active px-6 py-3 font-semibold text-blue-800 border-b-2 border-blue-800" data-tab="basic">기본 장비</button>
+                        <button class="gear-tab-btn px-6 py-3 font-semibold text-stone-500 border-b-2 border-transparent" data-tab="seasonal">계절/상황별 장비</button>
+                    </div>
+
+                    <div id="basic-gear" class="gear-tab-content grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <div class="bg-white p-4 rounded-xl shadow-md text-center"><p class="text-2xl mb-2">🎒</p><p>등산 백팩</p></div>
+                        <div class="bg-white p-4 rounded-xl shadow-md text-center"><p class="text-2xl mb-2">🥾</p><p>중등산화</p></div>
+                        <div class="bg-white p-4 rounded-xl shadow-md text-center"><p class="text-2xl mb-2">🦯</p><p>등산 스틱</p></div>
+                        <div class="bg-white p-4 rounded-xl shadow-md text-center"><p class="text-2xl mb-2">🧤</p><p>장갑</p></div>
+                        <div class="bg-white p-4 rounded-xl shadow-md text-center"><p class="text-2xl mb-2">💧</p><p>물 (1L 이상)</p></div>
+                        <div class="bg-white p-4 rounded-xl shadow-md text-center"><p class="text-2xl mb-2">🍫</p><p>간단한 행동식</p></div>
+                        <div class="bg-white p-4 rounded-xl shadow-md text-center"><p class="text-2xl mb-2">🧢</p><p>등산 모자</p></div>
+                        <div class="bg-white p-4 rounded-xl shadow-md text-center"><p class="text-2xl mb-2">☀️</p><p>자외선 차단제</p></div>
+                        <div class="bg-white p-4 rounded-xl shadow-md text-center"><p class="text-2xl mb-2">🩹</p><p>응급 키트</p></div>
+                        <div class="bg-white p-4 rounded-xl shadow-md text-center"><p class="text-2xl mb-2">🔋</p><p>보조배터리</p></div>
+                        <div class="bg-white p-4 rounded-xl shadow-md text-center"><p class="text-2xl mb-2">🧦</p><p>메리노울 양말</p></div>
+                        <div class="bg-white p-4 rounded-xl shadow-md text-center"><p class="text-2xl mb-2">🤕</p><p>무릎 보호대</p></div>
+                    </div>
+                    <div id="seasonal-gear" class="gear-tab-content hidden grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <div class="bg-white p-4 rounded-xl shadow-md text-center"><p class="text-2xl mb-2">🧥</p><p>보온용 자켓</p></div>
+                        <div class="bg-white p-4 rounded-xl shadow-md text-center"><p class="text-2xl mb-2">💨</p><p>바람막이/방수우의</p></div>
+                        <div class="bg-white p-4 rounded-xl shadow-md text-center"><p class="text-2xl mb-2">🔦</p><p>헤드랜턴</p></div>
+                        <div class="bg-white p-4 rounded-xl shadow-md text-center"><p class="text-2xl mb-2">❄️</p><p>아이젠 (동계)</p></div>
+                        <div class="bg-white p-4 rounded-xl shadow-md text-center"><p class="text-2xl mb-2">🥵</p><p>핫팩 (동계)</p></div>
+                        <div class="bg-white p-4 rounded-xl shadow-md text-center"><p class="text-2xl mb-2">🧣</p><p>바라클라바 (동계)</p></div>
+                         <div class="bg-white p-4 rounded-xl shadow-md text-center"><p class="text-2xl mb-2">🦵</p><p>스패츠</p></div>
+                        <div class="bg-white p-4 rounded-xl shadow-md text-center"><p class="text-2xl mb-2">💪</p><p>자외선 차단 토시</p></div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="seasons" class="scroll-mt-20 mb-16">
+                 <h2 class="text-3xl font-bold text-center mb-2 text-blue-900">사계절의 매력</h2>
+                 <p class="text-center text-stone-600 mb-10">계절마다 특별한 선물을 준비하는 두륜산의 모습입니다.</p>
+                <div class="max-w-4xl mx-auto grid md:grid-cols-2 gap-8">
+                    <div class="bg-white p-8 rounded-2xl shadow-lg flex flex-col items-center text-center">
+                        <div class="text-5xl mb-4">🌺</div>
+                        <h3 class="text-2xl font-bold mb-2 text-rose-600">늦겨울 ~ 초봄</h3>
+                        <p class="text-stone-600">추위 속에서 피어나는 붉은 동백꽃이 산행길에 아름다움을 더합니다.</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-2xl shadow-lg flex flex-col items-center text-center">
+                        <div class="text-5xl mb-4">🍂</div>
+                        <h3 class="text-2xl font-bold mb-2 text-amber-700">가을</h3>
+                        <p class="text-stone-600">맑고 청명한 하늘 아래, 그 어떤 산보다 환상적인 다도해 풍경을 감상할 수 있는 최적의 계절입니다.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="info" class="scroll-mt-20">
+                <h2 class="text-3xl font-bold text-center mb-2 text-blue-900">교통 및 주변 정보</h2>
+                <p class="text-center text-stone-600 mb-10">산행 시작점까지의 접근 방법과 하산 후 즐길 거리를 안내합니다.</p>
+                <div class="max-w-4xl mx-auto grid md:grid-cols-2 gap-8">
+                     <div class="bg-white p-8 rounded-2xl shadow-lg">
+                        <h3 class="text-2xl font-bold mb-4 text-emerald-700">오시는 길 🚗</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-semibold">자가용 이용 시</h4>
+                                <p class="text-stone-600">네비게이션에 '두륜산 오소재 공영주차장' 검색 (주차비 무료)</p>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold">대중교통 이용 시</h4>
+                                <p class="text-stone-600">해남종합버스터미널에서 오소재 방면 버스나 택시 이용</p>
+                            </div>
+                             <div>
+                                <h4 class="font-semibold">편의시설</h4>
+                                <p class="text-stone-600">오소재 주차장에 넓은 주차 공간과 화장실이 잘 갖춰져 있습니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-8 rounded-2xl shadow-lg">
+                        <h3 class="text-2xl font-bold mb-4 text-emerald-700">하산 후 즐길거리 🍽️</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-semibold">맛집 정보</h4>
+                                <p class="text-stone-600">두륜산 케이블카 탑승장 근처 또는 해남 읍내 식당가에서 남도의 맛있는 음식으로 든든하게 산행을 마무리할 수 있습니다.</p>
+                            </div>
+                             <div>
+                                <h4 class="font-semibold">추천 메뉴</h4>
+                                <p class="text-stone-600">산채비빔밥, 닭요리, 한정식 등 다양한 남도 음식을 즐겨보세요.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center py-10 mt-12 border-t border-stone-200">
+            <p class="text-stone-500">이 정보가 여러분의 두륜산 산행에 도움이 되기를 바랍니다.</p>
+            <p class="text-sm text-stone-400 mt-2">본 페이지는 '1분 등산' 콘텐츠를 기반으로 제작되었습니다.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const hikingTimeData = {
+                labels: ['상급자', '중급자', '초급자'],
+                datasets: [{
+                    label: '예상 소요 시간 (분)',
+                    data: [105, 140, 180],
+                    backgroundColor: [
+                        'rgba(5, 150, 105, 0.7)',  // emerald
+                        'rgba(217, 119, 6, 0.7)', // amber
+                        'rgba(225, 29, 72, 0.7)'  // rose
+                    ],
+                    borderColor: [
+                        'rgb(4, 120, 87)',
+                        'rgb(180, 83, 9)',
+                        'rgb(190, 18, 60)'
+                    ],
+                    borderWidth: 1,
+                    borderRadius: 8,
+                }]
+            };
+
+            const config = {
+                type: 'bar',
+                data: hikingTimeData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.x !== null) {
+                                        const totalMinutes = context.parsed.x;
+                                        const hours = Math.floor(totalMinutes / 60);
+                                        const minutes = totalMinutes % 60;
+                                        label += `${hours}시간 ${minutes}분`;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '시간 (분)'
+                            }
+                        }
+                    }
+                }
+            };
+            
+            const hikingTimeChart = new Chart(
+                document.getElementById('hikingTimeChart'),
+                config
+            );
+
+            const stepItems = document.querySelectorAll('.step-item');
+            stepItems.forEach(item => {
+                const header = item.querySelector('h3, p');
+                header.parentElement.addEventListener('click', () => {
+                    stepItems.forEach(otherItem => {
+                        if (otherItem !== item) {
+                            otherItem.classList.remove('active');
+                        }
+                    });
+                    item.classList.toggle('active');
+                });
+            });
+
+            const gearTabBtns = document.querySelectorAll('.gear-tab-btn');
+            const gearTabContents = document.querySelectorAll('.gear-tab-content');
+
+            gearTabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    gearTabBtns.forEach(b => {
+                        b.classList.remove('active', 'text-blue-800', 'border-blue-800');
+                        b.classList.add('text-stone-500', 'border-transparent');
+                    });
+                    btn.classList.add('active', 'text-blue-800', 'border-blue-800');
+                    btn.classList.remove('text-stone-500', 'border-transparent');
+                    
+                    const tabId = btn.dataset.tab;
+                    gearTabContents.forEach(content => {
+                        if (content.id === tabId + '-gear') {
+                            content.classList.remove('hidden');
+                        } else {
+                            content.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+            const navbar = document.getElementById('navbar');
+            const navbarHeight = navbar.offsetHeight;
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop - navbarHeight - 20;
+                    if (pageYOffset >= sectionTop) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active', 'text-blue-900', 'border-blue-900');
+                    if (link.getAttribute('href').substring(1) === current) {
+                        link.classList.add('active', 'text-blue-900', 'border-blue-900');
+                    }
+                });
+            });
+
+            navLinks.forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                         const offsetPosition = targetElement.offsetTop - navbarHeight;
+                         window.scrollTo({
+                            top: offsetPosition,
+                            behavior: "smooth"
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
