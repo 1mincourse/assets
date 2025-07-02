@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>두타산 인터랙티브 등산 가이드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Earthy Harmony -->
+    <!-- Application Structure Plan: A user-centric 'Hiker's Dashboard' SPA. Instead of a linear report, it uses a sticky nav and interactive sections (Overview, Stages, Prep, Alternatives, Local Info). This task-oriented design allows users to quickly grasp key data (stats), visually compare course difficulties (chart), explore the journey in digestible segments (clickable stages), and access practical info (gear/safety tabs) efficiently. This structure empowers users to make informed decisions rather than just passively reading. -->
+    <!-- Visualization & Content Choices: 
+        1. Report Info: Course Difficulty Comparison (Mureung vs. Daetjae) -> Goal: Compare -> Viz/Method: Grouped Bar Chart (Chart.js/Canvas) -> Interaction: Hover tooltips -> Justification: Visually quantifies *why* the main course is significantly harder due to its low starting altitude, a key insight from the report.
+        2. Report Info: Hike Journey Stages -> Goal: Organize -> Viz/Method: Interactive Timeline (HTML/CSS/Tailwind) -> Interaction: Click cards to reveal detailed descriptions -> Justification: Deconstructs the long, intimidating trek into three manageable, explorable phases, improving mental preparation and understanding.
+        3. Report Info: Preparation Items (Gear, Safety, Access) -> Goal: Organize/Inform -> Viz/Method: Tabbed Interface (HTML/CSS/JS) -> Interaction: Click tabs to switch content panels -> Justification: Neatly categorizes dense practical information, preventing overwhelm and allowing users to focus on one area at a time.
+        4. Report Info: Alternative Courses -> Goal: Compare/Inform -> Viz/Method: Comparison Cards (HTML/CSS/Tailwind) -> Interaction: Static display -> Justification: Provides clear, at-a-glance options for different hiker profiles (challenger, summiter, photographer), aiding user choice.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #F8F4F1;
+            color: #3C3633;
+        }
+        .bg-hero-gradient {
+            background: linear-gradient(135deg, #A2B29F 0%, #7C96AB 100%);
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #A2B29F;
+            border-bottom-color: #A2B29F;
+        }
+        .stage-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .stage-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .tab-button.active {
+            background-color: #7C96AB;
+            color: #F8F4F1;
+        }
+        .content-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .chart-container {
+            position: relative; 
+            width: 100%; 
+            max-width: 800px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            height: 350px;
+            max-height: 50vh;
+        }
+        @media (min-width: 768px) { .chart-container { height: 450px; } }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="top" class="bg-hero-gradient text-white text-center py-20 px-4">
+		<h3 class="text-2xl font-bold mb-2 text-blue-600">⛔본 자료는 1분등산 채널에서 제작한 콘텐츠로, 무단 복제·배포·상업적 이용을 금지합니다.⛔</h3>
+        <h1 class="text-4xl md:text-6xl font-black mb-2">1분등산 X 동해 두타산</h1>
+        <p class="text-lg md:text-xl font-light">신선이 노닐던 무릉도원의 비경과 백두대간의 장엄한 산세</p>
+		<p class="text-lg md:text-xl font-light mb-8">제작: 1분등산 (<a href="https://youtube.com/@1분등산" target="_blank" title="새창열림">https://youtube.com/@1분등산</a>)</p>
+        <div class="flex flex-wrap justify-center gap-4 max-w-4xl mx-auto">
+            <div class="bg-white/20 backdrop-blur-sm rounded-lg p-4 flex-grow text-center">
+                <p class="text-2xl md:text-3xl font-bold">14.5<span class="text-base font-normal">km</span></p>
+                <p class="text-sm">총 거리</p>
+            </div>
+            <div class="bg-white/20 backdrop-blur-sm rounded-lg p-4 flex-grow text-center">
+                <p class="text-2xl md:text-3xl font-bold">1,499<span class="text-base font-normal">m</span></p>
+                <p class="text-sm">누적 고도</p>
+            </div>
+            <div class="bg-white/20 backdrop-blur-sm rounded-lg p-4 flex-grow text-center">
+                <p class="text-2xl md:text-3xl font-bold">6~7<span class="text-base font-normal">시간</span></p>
+                <p class="text-sm">예상 시간</p>
+            </div>
+            <div class="bg-white/20 backdrop-blur-sm rounded-lg p-4 flex-grow text-center">
+                <p class="text-2xl md:text-3xl font-bold">중상급</p>
+                <p class="text-sm">난이도</p>
+            </div>
+        </div>
+    </header>
+
+    <nav id="navbar" class="sticky top-0 bg-[#F8F4F1]/80 backdrop-blur-md shadow-md z-50">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex justify-center items-center h-16 space-x-4 md:space-x-8 text-sm md:text-base font-bold">
+                <a href="#overview" class="nav-link px-2 py-1">코스 개요</a>
+                <a href="#stages" class="nav-link px-2 py-1">구간별 탐험</a>
+                <a href="#prep" class="nav-link px-2 py-1">산행 준비</a>
+                <a href="#alternatives" class="nav-link px-2 py-1">다른 코스</a>
+                <a href="#local" class="nav-link px-2 py-1">주변 정보</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto p-4 md:p-8">
+
+        <section id="overview" class="py-16 scroll-mt-16">
+            <h2 class="text-3xl font-bold text-center mb-4">코스 개요: 낙원과 고행의 두 얼굴</h2>
+            <p class="text-center max-w-3xl mx-auto mb-12 text-gray-600">두타산 무릉계곡 코스는 신선이 노닐던 낙원의 비경에서 시작하여, 속세의 번뇌를 잊는 고행의 길을 거쳐 정상에 서는 특별한 여정입니다. 이 앱은 당신의 위대한 도전을 위한 완벽한 가이드가 될 것입니다. 이 코스가 왜 다른 코스보다 힘든지, 아래 차트를 통해 시각적으로 확인해 보세요.</p>
+            <div class="chart-container">
+                <canvas id="courseComparisonChart"></canvas>
+            </div>
+             <p class="text-center text-sm text-gray-500 mt-4">무릉계곡 코스는 댓재 코스보다 훨씬 낮은 해발고도에서 시작하기 때문에, 비슷한 거리임에도 불구하고 올라야 할 수직 높이가 엄청나게 차이 나 극심한 체력을 요구합니다.</p>
+        </section>
+
+        <section id="stages" class="py-16 scroll-mt-16">
+            <h2 class="text-3xl font-bold text-center mb-4">구간별 탐험: 3단계 여정</h2>
+            <p class="text-center max-w-3xl mx-auto mb-12 text-gray-600">총 14.5km의 대장정은 세 가지 뚜렷한 특징을 가진 구간으로 나뉩니다. 각 카드를 클릭하여 구간별 상세 정보와 공략법을 확인하세요.</p>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="stage-card cursor-pointer bg-white rounded-lg shadow-lg overflow-hidden" data-stage="1">
+                    <div class="p-6">
+                        <p class="text-sm font-bold text-[#A2B29F]">STAGE 1</p>
+                        <h3 class="text-xl font-bold mb-2">신선의 길 (계곡~쌍폭포)</h3>
+                        <p class="text-gray-600">낙원 같은 계곡을 따라 걸으며 무릉도원의 비경을 만끽하는 구간입니다.</p>
+                    </div>
+                </div>
+                <div class="stage-card cursor-pointer bg-white rounded-lg shadow-lg overflow-hidden" data-stage="2">
+                     <div class="p-6">
+                        <p class="text-sm font-bold text-[#7C96AB]">STAGE 2</p>
+                        <h3 class="text-xl font-bold mb-2">하늘로의 등반 (쌍폭포~정상)</h3>
+                        <p class="text-gray-600">자신과의 싸움. 끝없는 오르막을 이겨내고 정상에 서는 핵심 구간입니다.</p>
+                    </div>
+                </div>
+                <div class="stage-card cursor-pointer bg-white rounded-lg shadow-lg overflow-hidden" data-stage="3">
+                     <div class="p-6">
+                        <p class="text-sm font-bold text-[#E0A75E]">STAGE 3</p>
+                        <h3 class="text-xl font-bold mb-2">통제된 하산 (정상~원점)</h3>
+                        <p class="text-gray-600">역사의 길을 따라, 마지막까지 긴장을 늦추지 않고 안전하게 마무리하는 구간입니다.</p>
+                    </div>
+                </div>
+            </div>
+            <div id="stage-details" class="mt-8"></div>
+        </section>
+
+        <section id="prep" class="py-16 scroll-mt-16">
+            <h2 class="text-3xl font-bold text-center mb-4">완벽한 산행 준비</h2>
+            <p class="text-center max-w-3xl mx-auto mb-12 text-gray-600">두타산의 험준함은 철저한 준비를 요구합니다. 장비, 안전 수칙, 교통 정보까지, 성공적인 산행을 위해 알아야 할 모든 것을 확인하세요.</p>
+            <div class="bg-white rounded-lg shadow-lg p-4 md:p-8 max-w-4xl mx-auto">
+                <div class="flex justify-center border-b mb-6">
+                    <button class="tab-button flex-1 py-3 px-2 text-center font-bold text-gray-500 transition-colors duration-300 active" data-tab="gear">🎒 필수 장비</button>
+                    <button class="tab-button flex-1 py-3 px-2 text-center font-bold text-gray-500 transition-colors duration-300" data-tab="safety">⚠️ 안전 수칙</button>
+                    <button class="tab-button flex-1 py-3 px-2 text-center font-bold text-gray-500 transition-colors duration-300" data-tab="access">🚗 교통/요금</button>
+                </div>
+                <div id="prep-content">
+                </div>
+            </div>
+        </section>
+
+        <section id="alternatives" class="py-16 scroll-mt-16">
+            <h2 class="text-3xl font-bold text-center mb-4">내게 맞는 모험 선택하기</h2>
+             <p class="text-center max-w-3xl mx-auto mb-12 text-gray-600">두타산을 즐기는 방법은 한 가지만 있는 것이 아닙니다. 당신의 체력과 목표에 맞는 최적의 코스를 선택해 보세요.</p>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col">
+                    <h3 class="text-xl font-bold mb-2 text-center">위대한 횡단 (무릉계곡)</h3>
+                    <p class="text-sm text-center text-gray-500 mb-4">도전과 성취를 원하는 당신에게</p>
+                    <ul class="space-y-2 text-gray-700 flex-grow">
+                        <li><span class="font-bold">거리:</span> ~14.5km</li>
+                        <li><span class="font-bold">고도:</span> ~1500m</li>
+                        <li><span class="font-bold">시간:</span> 6-7시간</li>
+                        <li><span class="font-bold">특징:</span> 계곡, 폭포, 정상 조망을 모두 경험하는 대표 코스. 극강의 체력 요구.</li>
+                    </ul>
+                </div>
+                 <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col">
+                    <h3 class="text-xl font-bold mb-2 text-center">빠른 정상 등정 (댓재)</h3>
+                    <p class="text-sm text-center text-gray-500 mb-4">정상 인증이 목표인 당신에게</p>
+                    <ul class="space-y-2 text-gray-700 flex-grow">
+                        <li><span class="font-bold">거리:</span> ~12km</li>
+                        <li><span class="font-bold">고도:</span> 상대적으로 낮음</li>
+                        <li><span class="font-bold">시간:</span> 4-5시간</li>
+                        <li><span class="font-bold">특징:</span> 높은 지점에서 출발하여 등반 부담이 적은 최단 코스.</li>
+                    </ul>
+                </div>
+                 <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col">
+                    <h3 class="text-xl font-bold mb-2 text-center">비경 감상 (베틀바위)</h3>
+                    <p class="text-sm text-center text-gray-500 mb-4">아름다운 풍경을 즐기는 당신에게</p>
+                    <ul class="space-y-2 text-gray-700 flex-grow">
+                        <li><span class="font-bold">거리:</span> ~10km</li>
+                        <li><span class="font-bold">고도:</span> 보통</li>
+                        <li><span class="font-bold">시간:</span> 4-6시간</li>
+                        <li><span class="font-bold">특징:</span> 정상은 가지 않지만, 기암절벽과 협곡의 드라마틱한 풍경을 즐기는 인기 코스.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        
+        <section id="local" class="py-16 scroll-mt-16">
+            <h2 class="text-3xl font-bold text-center mb-4">산행 그 너머: 동해의 맛</h2>
+            <p class="text-center max-w-3xl mx-auto mb-12 text-gray-600">힘든 산행 후에는 꿀맛 같은 보상이 필요합니다. 두타산이 위치한 동해시에서 즐길 수 있는 특별한 먹거리를 만나보세요.</p>
+            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                 <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-bold mb-2">산자락의 맛: 산채비빔밥</h3>
+                    <p class="text-gray-700">무릉계곡 입구 식당가에서 맛볼 수 있는 건강하고 소박한 맛. 신선한 산나물과 고소한 참기름의 조화가 지친 몸에 활력을 불어넣어 줍니다.</p>
+                 </div>
+                 <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-bold mb-2">도시의 맛: 물닭갈비</h3>
+                    <p class="text-gray-700">동해시의 명물. 국물이 자작한 전골 형태의 독특한 닭갈비로, 얼큰하고 시원한 국물이 산행의 피로를 말끔히 씻어줍니다.</p>
+                 </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8 text-center">
+		<p>이 정보가 여러분의 두타산 산행에 도움이 되기를 바랍니다.</p>
+		<p class="text-sm text-center text-gray-500 mb-4">본 페이지는 '1분등산' 콘텐츠를 기반으로 제작되었습니다.</p>
+		<p>제작: 1분등산 (<a href="https://youtube.com/@1분등산" target="_blank" title="새창열림">https://youtube.com/@1분등산</a>)</p>
+		<h3 class="text-2xl font-bold mb-2 text-blue-600">⛔본 자료는 1분등산 채널에서 제작한 콘텐츠로, 무단 복제·배포·상업적 이용을 금지합니다.⛔</h3>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const stageData = {
+        1: {
+            title: '1구간: 신선의 길 (무릉계곡 주차장 → 쌍폭포)',
+            content: `
+                <p class="mb-4">산행의 시작은 평화로운 계곡길입니다. 수많은 시인 묵객이 글씨를 남긴 거대한 너럭바위 '무릉반석'과 천년고찰 '삼화사'를 지나며 마음을 가다듬습니다. 이 구간의 하이라이트는 두 줄기 물기둥이 장관을 이루는 '쌍폭포'입니다.</p>
+                <ul class="list-disc list-inside space-y-2">
+                    <li><strong>주요 지점:</strong> 무릉반석, 삼화사, 학소대, 쌍폭포, 용추폭포</li>
+                    <li><strong>지형:</strong> 대부분 완만한 계곡길과 평지</li>
+                    <li><strong>공략:</strong> 힘을 아끼며 주변 경치를 충분히 즐기세요. 본격적인 오르막 전 마지막 휴식 지점입니다.</li>
+                </ul>
+            `
+        },
+        2: {
+            title: '2구간: 하늘로의 등반 (쌍폭포 → 두타산 정상)',
+            content: `
+                <p class="mb-4">'깔딱고개'라 불리는 끝없는 계단과 가파른 바윗길이 시작됩니다. 계곡 바닥에서 정상까지 1,100m 이상의 고도를 극복해야 하는 인내와 의지의 시험 구간입니다. 하지만 정상에 서는 순간, 동해바다와 백두대간의 장쾌한 파노라마가 모든 고통을 잊게 합니다.</p>
+                <ul class="list-disc list-inside space-y-2">
+                    <li><strong>주요 지점:</strong> 대궐터, 두타산성 갈림길, 정상(1,353m)</li>
+                    <li><strong>지형:</strong> 급경사 계단, 흙길, 험준한 바윗길</li>
+                    <li><strong>공략:</strong> 체력 안배가 가장 중요합니다. 꾸준한 페이스를 유지하고, 짧고 잦은 휴식을 가지세요.</li>
+                </ul>
+            `
+        },
+        3: {
+            title: '3구간: 통제된 하산 (두타산 정상 → 원점)',
+            content: `
+                <p class="mb-4">하산길 역시 만만치 않습니다. 경사가 가파르고 돌이 많아 무릎에 부담이 많이 갑니다. 신라 시대에 축성된 '두타산성' 유적을 지나며 역사의 흔적을 느낄 수 있습니다. 마지막까지 집중력을 잃지 말고 안전하게 산행을 마무리해야 합니다.</p>
+                <ul class="list-disc list-inside space-y-2">
+                    <li><strong>주요 지점:</strong> 박달재, 두타산성, 삼화사</li>
+                    <li><strong>지형:</strong> 가파른 내리막 돌길과 흙길</li>
+                    <li><strong>공략:</strong> 등산 스틱을 적극적으로 사용해 무릎을 보호하고, 발을 내디딜 곳을 신중하게 확인하며 천천히 하산하세요.</li>
+                </ul>
+            `
+        }
+    };
+
+    const prepData = {
+        gear: `
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-bold text-lg mb-2 text-[#A2B29F]">🟩 기본 장비</h4>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>등산 백팩 (25~40L)</li>
+                        <li>발목 보호용 중등산화 (필수)</li>
+                        <li>접이식 등산스틱 (필수)</li>
+                        <li>무릎 보호대, 메리노울 양말</li>
+                        <li>충분한 물 (2L 이상) 및 보온병</li>
+                        <li>등산 모자, 장갑, 선크림</li>
+                        <li>헤드랜턴, 응급 키트 (필수)</li>
+                        <li>고열량 간식 및 식사 (김밥, 초콜릿 등)</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-2 text-[#7C96AB]">🟥 계절/상황별 장비</h4>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>베이스레이어 (속건성 의류)</li>
+                        <li>미드레이어 (플리스, 경량패딩)</li>
+                        <li>아웃레이어 (고어텍스 바람막이)</li>
+                        <li>우의, 스패츠 (악천후/겨울)</li>
+                        <li>아이젠 (겨울 산행 필수)</li>
+                        <li>핫팩, 바라클라바 (겨울)</li>
+                    </ul>
+                </div>
+            </div>
+        `,
+        safety: `
+            <ul class="space-y-4">
+                <li class="p-4 bg-yellow-100/50 border-l-4 border-yellow-500 rounded-r-lg">
+                    <h4 class="font-bold">⚠️ 일찍 출발하기</h4>
+                    <p>최소 7시간 이상 소요되는 장거리 코스이므로 반드시 이른 아침에 산행을 시작하여 일몰 전에 하산해야 합니다.</p>
+                </li>
+                <li class="p-4 bg-red-100/50 border-l-4 border-red-500 rounded-r-lg">
+                    <h4 class="font-bold">⚠️ 돌아올 수 없는 지점 (Point of No Return)</h4>
+                    <p>쌍폭포를 지나면 중간 탈출로가 거의 없습니다. 자신의 체력과 컨디션을 신중히 고려하여 진행 여부를 결정하세요.</p>
+                </li>
+                <li class="p-4 bg-blue-100/50 border-l-4 border-blue-500 rounded-r-lg">
+                    <h4 class="font-bold">💧 충분한 수분과 영양 섭취</h4>
+                    <p>체력 소모가 극심하므로 물 2리터 이상과 고열량 행동식을 반드시 준비하여 꾸준히 섭취해야 합니다.</p>
+                </li>
+                 <li class="p-4 bg-gray-200 border-l-4 border-gray-500 rounded-r-lg">
+                    <h4 class="font-bold">🚫 반려동물 출입 금지</h4>
+                    <p>무릉계곡은 국가지정문화재 명승으로, 반려동물(강아지)의 출입이 엄격히 금지되어 있습니다.</p>
+                </li>
+            </ul>
+        `,
+        access: `
+            <table class="w-full text-left">
+                <thead class="border-b">
+                    <tr><th class="py-2">항목</th><th class="py-2">상세 정보</th></tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b"><td class="py-3 font-bold">📍 내비게이션</td><td class="py-3">무릉계곡주차장 (강원 동해시 삼화로 538)</td></tr>
+                    <tr class="border-b"><td class="py-3 font-bold">💵 입장료</td><td class="py-3">성인 4,000원</td></tr>
+                    <tr class="border-b"><td class="py-3 font-bold">🚗 주차료</td><td class="py-3">소형차 2,000원 / 대형차 5,000원</td></tr>
+                    <tr class="border-b"><td class="py-3 font-bold">🚌 대중교통</td><td class="py-3">동해시 111번 버스 이용 (배차 간격 길어 시간표 확인 필수)</td></tr>
+                    <tr><td class="py-3 font-bold"> amenity 시설</td><td class="py-3">주차장 인근에 화장실, 식당, 편의점 등 잘 갖춰짐</td></tr>
+                </tbody>
+            </table>
+        `
+    };
+
+    const stageDetailsContainer = document.getElementById('stage-details');
+    const stageCards = document.querySelectorAll('.stage-card');
+
+    stageCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const stageId = card.dataset.stage;
+            const data = stageData[stageId];
+            
+            stageDetailsContainer.innerHTML = `
+                <div class="bg-white p-6 rounded-lg shadow-lg content-fade-in">
+                    <h3 class="text-2xl font-bold mb-4">${data.title}</h3>
+                    ${data.content}
+                </div>
+            `;
+            stageDetailsContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+    });
+
+    const prepContentContainer = document.getElementById('prep-content');
+    const tabButtons = document.querySelectorAll('.tab-button');
+    
+    function updatePrepContent(tabId) {
+        prepContentContainer.innerHTML = `<div class="content-fade-in">${prepData[tabId]}</div>`;
+        tabButtons.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tab === tabId);
+        });
+    }
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            updatePrepContent(button.dataset.tab);
+        });
+    });
+
+    updatePrepContent('gear');
+
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('section');
+
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            if (pageYOffset >= sectionTop - 80) {
+                current = section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href').includes(current)) {
+                link.classList.add('active');
+            }
+        });
+    });
+    
+    navLinks.forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+
+    const ctx = document.getElementById('courseComparisonChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['총 누적 상승 고도 (m)', '출발 고도 (m)'],
+            datasets: [{
+                label: '무릉계곡 코스 (도전자)',
+                data: [1499, 150],
+                backgroundColor: '#7C96AB',
+                borderColor: '#637A8A',
+                borderWidth: 1
+            }, {
+                label: '댓재 코스 (최단)',
+                data: [650, 810],
+                backgroundColor: '#A2B29F',
+                borderColor: '#899986',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: '두타산 주요 코스 난이도 비교',
+                    font: { size: 18, weight: 'bold' },
+                    padding: { top: 10, bottom: 20 }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += context.parsed.y + 'm';
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: '고도 (m)'
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+
+</body>
+</html>
