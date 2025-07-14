@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>민주지산 삼도봉 | 등산 가이드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+        body { font-family: 'Noto Sans KR', sans-serif; }
+        .tab-active { border-color: #10B981; color: #10B981; font-weight: 600; }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .chart-container { position: relative; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; height: 300px; max-height: 40vh; }
+        @media (min-width: 768px) { .chart-container { height: 400px; } }
+        .info-card { background-color: #F9FAFB; border-left: 4px solid #34D399; }
+        .story-card { background: white; border: 1px solid #E5E7EB; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
+        .nav-button-active { background-color: #10B981; color: white; }
+    </style>
+    <!-- Chosen Palette: Emerald Green & Warm Neutrals -->
+    <!-- Application Structure Plan: A tab-based, single-page dashboard design was chosen for optimal user experience. This structure logically segments the dense report information into digestible themes: '개요' (Overview), '코스 분석' (Course Analysis), '계절' (Seasons), '이야기' (Stories), and '정보' (Info). This non-linear approach allows users to directly access the information they need, rather than scrolling through a long, linear document mimicking the report. Key interactions include tab navigation to switch between full-page content sections, and within the '코스 분석' section, clicking on timeline segments to reveal detailed text descriptions, which connects visual data (the elevation chart) with qualitative analysis. This design prioritizes usability and quick information retrieval. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Overall course stats (distance, elevation, time). -> Goal: Inform. -> Viz: Key metric cards & a donut chart for pace comparison. -> Interaction: Static display. -> Justification: Provides a quick, scannable summary for initial planning. -> Library/Method: HTML/Tailwind for cards, Chart.js for the donut chart.
+        - Report Info: Detailed course segments, elevation changes, and descriptions. -> Goal: Compare & Organize. -> Viz: An interactive elevation profile line chart and a clickable HTML/CSS timeline diagram. -> Interaction: Clicking a timeline segment displays its detailed description below the chart. -> Justification: This is the core interactive element, allowing users to visually correlate the trail's physical challenges (elevation) with specific landmarks and advice, creating a virtual 'walk-through' experience. -> Library/Method: Chart.js for the line chart, HTML/CSS/JS for the interactive timeline.
+        - Report Info: Seasonal characteristics and tips. -> Goal: Inform. -> Viz: A tabbed content area using styled HTML and icons. -> Interaction: Clicking tabs reveals content for each season. -> Justification: Organizes a large amount of conditional advice into a compact, user-friendly component. -> Library/Method: HTML/Tailwind/JS.
+        - Report Info: Historical and cultural narratives (mountain name, Samdobong, military tragedy). -> Goal: Inform/Engage. -> Viz: Styled text blocks with icons. -> Interaction: Static display. -> Justification: Presents narrative content in a clean, readable format that separates it from the technical hiking data. -> Library/Method: HTML/Tailwind.
+        - CONFIRMING NO SVG/Mermaid. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+        
+        <header class="text-center mb-8">
+			<h3 class="text-2xl font-bold mb-2 text-rose-500">⛔본 자료는 1분등산 채널에서 제작한 콘텐츠로, 무단 복제·배포·상업적 이용을 금지합니다.⛔</h3>
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-2">민주지산 삼도봉 등산코스</h1>
+            <p class="text-lg text-gray-600">완전정복 가이드</p>
+			<p class="text-sm text-gray-400 mt-2">제작: 1분등산 (<a href="https://youtube.com/@1분등산" target="_blank" title="새창열림">https://youtube.com/@1분등산</a>)</p>
+        </header>
+
+        <nav class="flex justify-center border-b-2 border-gray-200 mb-8 flex-wrap">
+            <button class="nav-tab py-4 px-6 block hover:text-emerald-500 focus:outline-none text-gray-600 border-b-2 border-transparent tab-active" data-tab="overview">
+                🗺️ 코스 개요
+            </button>
+            <button class="nav-tab py-4 px-6 block hover:text-emerald-500 focus:outline-none text-gray-600 border-b-2 border-transparent" data-tab="analysis">
+                📈 상세 코스 분석
+            </button>
+            <button class="nav-tab py-4 px-6 block hover:text-emerald-500 focus:outline-none text-gray-600 border-b-2 border-transparent" data-tab="seasons">
+                ☀️ 계절별 탐사
+            </button>
+            <button class="nav-tab py-4 px-6 block hover:text-emerald-500 focus:outline-none text-gray-600 border-b-2 border-transparent" data-tab="stories">
+                📖 이야기
+            </button>
+            <button class="nav-tab py-4 px-6 block hover:text-emerald-500 focus:outline-none text-gray-600 border-b-2 border-transparent" data-tab="info">
+                🎒 산행 정보
+            </button>
+        </nav>
+
+        <main>
+            <section id="overview" class="content-section active">
+                <div class="text-center mb-8 p-4 bg-white rounded-lg shadow-sm">
+                    <h2 class="text-3xl font-bold mb-2">한눈에 보는 민주지산 일주코스</h2>
+                    <p class="text-gray-600 max-w-3xl mx-auto">충청, 경상, 전라 3도가 만나는 삼도봉을 포함, 세 개의 주봉(민주지산, 석기봉, 삼도봉)을 모두 오르는 대표적인 원점회귀 코스입니다. 총 거리가 길고 누적고도가 높아, 꾸준한 체력과 등산 경험이 있는 중상급자에게 적합합니다.</p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-6 text-center mb-8">
+                    <div class="p-6 bg-white rounded-lg shadow-md">
+                        <span class="text-5xl">📏</span>
+                        <h3 class="text-2xl font-bold mt-2">약 16.0 km</h3>
+                        <p class="text-gray-600">총 거리</p>
+                    </div>
+                    <div class="p-6 bg-white rounded-lg shadow-md">
+                        <span class="text-5xl">🏔️</span>
+                        <h3 class="text-2xl font-bold mt-2">약 1,350 m</h3>
+                        <p class="text-gray-600">누적 상승고도</p>
+                    </div>
+                    <div class="p-6 bg-white rounded-lg shadow-md">
+                        <span class="text-5xl">⏱️</span>
+                        <h3 class="text-2xl font-bold mt-2">6 ~ 8.5 시간</h3>
+                        <p class="text-gray-600">예상 소요 시간</p>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-2xl font-bold text-center mb-4">걸음 속도별 예상 시간</h3>
+                    <div class="chart-container h-64 md:h-72">
+                        <canvas id="paceChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section id="analysis" class="content-section">
+                <div class="text-center mb-8 p-4 bg-white rounded-lg shadow-sm">
+                    <h2 class="text-3xl font-bold mb-2">상세 코스 분석</h2>
+                    <p class="text-gray-600 max-w-3xl mx-auto">코스 전체의 고도 변화를 시각적으로 확인하고, 아래 타임라인에서 각 구간을 클릭하여 상세 정보를 살펴보세요. 기술적으로 가장 어려운 구간은 민주지산에서 석기봉으로 향하는 암릉 구간입니다.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                     <h3 class="text-2xl font-bold text-center mb-4">고도 프로필</h3>
+                    <div class="chart-container">
+                        <canvas id="elevationChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-2xl font-bold text-center mb-6">코스 구간별 가이드</h3>
+                    <div id="course-timeline" class="space-y-4">
+                    </div>
+                    <div id="course-details" class="mt-8 p-6 rounded-lg info-card min-h-[150px]">
+                        <p class="text-center text-gray-500">위 타임라인에서 구간을 선택하면 여기에 상세 설명이 표시됩니다.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="seasons" class="content-section">
+                 <div class="text-center mb-8 p-4 bg-white rounded-lg shadow-sm">
+                    <h2 class="text-3xl font-bold mb-2">민주지산의 네 가지 얼굴</h2>
+                    <p class="text-gray-600 max-w-3xl mx-auto">민주지산은 사계절 내내 각기 다른 매력을 뽐냅니다. 계절별 특징과 필수 준비물을 확인하여 안전하고 즐거운 산행을 계획하세요.</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex justify-center border-b mb-6">
+                        <button class="nav-button p-4 text-lg font-medium nav-button-active" data-season="spring">🌸 봄</button>
+                        <button class="nav-button p-4 text-lg font-medium" data-season="summer">🌿 여름</button>
+                        <button class="nav-button p-4 text-lg font-medium" data-season="autumn">🍂 가을</button>
+                        <button class="nav-button p-4 text-lg font-medium" data-season="winter">❄️ 겨울</button>
+                    </div>
+                    <div id="season-content">
+                    </div>
+                </div>
+            </section>
+
+            <section id="stories" class="content-section">
+                <div class="text-center mb-8 p-4 bg-white rounded-lg shadow-sm">
+                    <h2 class="text-3xl font-bold mb-2">이야기가 있는 산</h2>
+                    <p class="text-gray-600 max-w-3xl mx-auto">민주지산 산행은 그 땅에 깃든 이야기를 이해할 때 비로소 완성됩니다. 이름의 유래부터 기념비에 담긴 의미까지, 산의 깊은 서사를 탐험해 보세요.</p>
+                </div>
+                <div class="space-y-8">
+                    <div class="story-card p-6 rounded-lg">
+                        <h3 class="text-2xl font-bold mb-3 flex items-center"><span class="text-3xl mr-3">🤔</span>민주지산(岷周之山)의 진짜 의미</h3>
+                        <p>이 산의 이름은 '민주주의'와는 관련이 없습니다. 산봉우리들의 높이가 비슷하여 '민둥민둥'하게 보인다고 하여 순우리말 '민두름산'으로 불렸고, 이를 한자로 표기한 것이 민주지산입니다. 산의 본래 모습을 담은 이름입니다.</p>
+                    </div>
+                    <div class="story-card p-6 rounded-lg">
+                        <h3 class="text-2xl font-bold mb-3 flex items-center"><span class="text-3xl mr-3">🤝</span>삼도봉(三道峯) 대화합 기념탑</h3>
+                        <p>충북, 전북, 경북 3도가 만나는 삼도봉은 과거 삼국시대 격전지였으나, 현재는 화합의 장으로 거듭났습니다. 매년 10월 10일, 세 지역 주민들이 모여 화합을 다지는 행사를 열며, 정상의 '대화합기념탑'은 이러한 평화의 염원을 상징합니다.</p>
+                    </div>
+                     <div class="story-card p-6 rounded-lg">
+                        <h3 class="text-2xl font-bold mb-3 flex items-center"><span class="text-3xl mr-3">🙏</span>엄숙한 기억: 1998년 특전사 참사</h3>
+                        <p>1998년 4월, 천리행군 중이던 특전사 대원 6명이 예측 불가능한 기상 악화(폭설, 기온 급강하)로 인해 저체온증으로 순직한 비극적인 사고가 있었습니다. 이 사건은 계절과 상관없이 산의 예측 불가능한 위험과 철저한 준비의 중요성을 모두에게 일깨워주는 뼈아픈 교훈입니다. 정상 아래 무인대피소와 들머리의 위령비가 그날을 기억하게 합니다.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="info" class="content-section">
+                 <div class="text-center mb-8 p-4 bg-white rounded-lg shadow-sm">
+                    <h2 class="text-3xl font-bold mb-2">완벽한 원정을 위한 정보</h2>
+                    <p class="text-gray-600 max-w-3xl mx-auto">장거리 산행에 필요한 장비부터 교통편, 주변 시설 정보까지. 성공적인 산행을 위해 꼭 확인해야 할 필수 정보들을 모았습니다.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-bold mb-4">🎒 추천 장비</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <h4 class="font-semibold text-emerald-600">기본 장비</h4>
+                                <ul class="list-disc list-inside text-gray-700">
+                                    <li>중등산화, 등산스틱</li>
+                                    <li>30L 이상 백팩</li>
+                                    <li>물 2L 이상, 간식</li>
+                                    <li>방풍/방수 의류</li>
+                                    <li>헤드랜턴, 보조배터리</li>
+                                </ul>
+                            </div>
+                             <div>
+                                <h4 class="font-semibold text-red-600">특화/동계 장비</h4>
+                                <ul class="list-disc list-inside text-gray-700">
+                                    <li>아이젠, 스패츠</li>
+                                    <li>보온 의류 (플리스 등)</li>
+                                    <li>핫팩, 바라클라바</li>
+                                    <li>장갑, 무릎보호대</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-bold mb-4">🚗 교통 정보</h3>
+                        <h4 class="font-semibold text-emerald-600">자가용 (권장)</h4>
+                        <p class="mb-3">내비게이션: '물한계곡주차장' (충북 영동군 상촌면 물한리 277-2)<br>주차비 무료. 주말/공휴일에는 새벽에도 만차될 수 있으니 매우 이른 출발 필수.</p>
+                        <h4 class="font-semibold text-red-600">대중교통 (주의 필요)</h4>
+                        <p>영동역 앞에서 640, 642번 버스 탑승 후 종점 하차 (약 1시간). 배차 간격이 매우 길어 하루 운행 횟수가 적으므로, '영동군 농어촌버스' 최신 시간표를 반드시 확인해야 합니다.</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-lg shadow-md md:col-span-2">
+                        <h3 class="text-2xl font-bold mb-4">🚻 편의 시설 및 에티켓</h3>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><strong>화장실:</strong> 주차장에 있으나 동절기에는 동파로 폐쇄될 수 있습니다. 이 경우, 임도 초입의 간이 화장실을 이용해야 합니다.</li>
+                            <li><strong>식당:</strong> 들머리 근처에 '일송가든', '삼도봉식당' 등 능이버섯 요리 전문점이 있습니다.</li>
+                            <li><strong>에티켓:</strong> 물한계곡 내 지정된 장소 외 취사 및 야영은 금지되어 있습니다. (과태료 부과) 'Leave No Trace' 원칙을 준수해 주세요.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center mt-12 pt-8 border-t border-gray-200">
+			<p class="text-gray-500">이 정보가 여러분의 완주 모악산 산행에 도움이 되기를 바랍니다.</p>
+			<p class="text-gray-500">본 페이지는 '1분등산' 콘텐츠를 기반으로 제작되었습니다.</p>
+			<p class="text-sm text-gray-400 mt-2">제작: 1분등산 (<a href="https://youtube.com/@1분등산" target="_blank" title="새창열림">https://youtube.com/@1분등산</a>)</p>
+			<h3 class="text-2xl font-bold mb-2 text-rose-500">⛔본 자료는 1분등산 채널에서 제작한 콘텐츠로, 무단 복제·배포·상업적 이용을 금지합니다.⛔</h3>
+        </footer>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const tabs = document.querySelectorAll('.nav-tab');
+    const sections = document.querySelectorAll('.content-section');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(item => item.classList.remove('tab-active'));
+            tab.classList.add('tab-active');
+
+            const target = tab.getAttribute('data-tab');
+            sections.forEach(section => {
+                if (section.id === target) {
+                    section.classList.add('active');
+                } else {
+                    section.classList.remove('active');
+                }
+            });
+        });
+    });
+
+    const paceData = {
+        labels: ['빠른 걸음 (약 6시간)', '보통 걸음 (약 7시간)', '느린 걸음 (약 8.5시간)'],
+        datasets: [{
+            label: '걸음 속도별 소요 시간',
+            data: [6, 7, 8.5],
+            backgroundColor: ['#D1FAE5', '#6EE7B7', '#10B981'],
+            borderColor: '#ffffff',
+            borderWidth: 2
+        }]
+    };
+    new Chart(document.getElementById('paceChart'), {
+        type: 'doughnut',
+        data: paceData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.label}: ${context.raw} 시간`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    const elevationData = {
+        labels: ['주차장', '황룡사', '주능선', '민주지산', '석기봉', '삼도봉', '삼마골재', '주차장'],
+        datasets: [{
+            label: '고도(m)',
+            data: [420, 520, 1180, 1241, 1200, 1176, 1026, 420],
+            fill: true,
+            backgroundColor: 'rgba(16, 185, 129, 0.2)',
+            borderColor: 'rgba(16, 185, 129, 1)',
+            tension: 0.1,
+            pointBackgroundColor: 'rgba(16, 185, 129, 1)',
+            pointBorderColor: '#fff',
+            pointHoverRadius: 7,
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: 'rgba(16, 185, 129, 1)'
+        }]
+    };
+    new Chart(document.getElementById('elevationChart'), {
+        type: 'line',
+        data: elevationData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    title: { display: true, text: '고도 (m)' }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                     callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.parsed.y}m`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    const courseSegments = [
+        { title: '물한계곡 주차장 → 황룡사', distance: '1.5km', time: '약 25분', details: '완만한 임도 구간입니다. 본격적인 산행 전, 에너지를 비축하고 준비운동을 하는 중요한 구간입니다. 쉬운 길에 현혹되어 속도를 내지 않도록 주의하세요.' },
+        { title: '황룡사 → 민주지산 정상', distance: '4.0km', time: '약 120-150분', details: '산이 본색을 드러내는 가파른 오르막의 연속입니다. 초반 체력 안배가 매우 중요하며, 여러 개의 작은 계곡을 건너게 됩니다. 정상 직전 0.7km 구간은 경사가 매우 급합니다.' },
+        { title: '민주지산 정상 → 석기봉', distance: '1.4km', time: '약 60-70분', details: '기술적으로 가장 까다로운 암릉 구간입니다. 날카로운 바위가 많아 손을 사용해야 할 수 있으며, 높은 집중력이 필요합니다. 겨울철 결빙 시 매우 위험하니 각별히 주의해야 합니다.' },
+        { title: '석기봉 → 삼도봉', distance: '1.6km', time: '약 40-50분', details: '암릉 구간을 통과하면 비교적 완만하고 부드러운 능선길이 이어집니다. 봄에는 아름다운 진달래 군락을 만날 수 있는 구간입니다.' },
+        { title: '삼도봉 → 삼마골재', distance: '1.0km', time: '약 25분', details: '하산의 시작점입니다. 삼마골재 갈림길에서 \'황룡사\' 방면 이정표를 정확히 확인해야 길을 잃지 않습니다. 잠시 백두대간 마루금을 걷게 됩니다.' },
+        { title: '삼마골재 → 주차장', distance: '6.5km', time: '약 120-140분', details: '예상보다 길고 다소 지루하게 느껴질 수 있는 긴 내리막 구간입니다. 피로가 누적된 상태이므로 집중력을 유지하고, 무릎 보호대 착용을 권장합니다.' },
+    ];
+
+    const timelineContainer = document.getElementById('course-timeline');
+    const detailsContainer = document.getElementById('course-details');
+    
+    courseSegments.forEach((segment, index) => {
+        const button = document.createElement('button');
+        button.className = 'w-full text-left p-4 rounded-lg border border-gray-200 hover:bg-emerald-50 hover:border-emerald-300 transition-all duration-200';
+        button.innerHTML = `<div class="flex justify-between items-center">
+                                <span class="font-semibold text-lg text-gray-700">${index + 1}. ${segment.title}</span>
+                                <span class="text-sm text-gray-500">${segment.distance} / ${segment.time}</span>
+                            </div>`;
+        button.addEventListener('click', () => {
+            document.querySelectorAll('#course-timeline button').forEach(btn => btn.classList.remove('bg-emerald-100', 'border-emerald-400'));
+            button.classList.add('bg-emerald-100', 'border-emerald-400');
+            detailsContainer.innerHTML = `<h4 class="font-bold text-xl mb-2 text-emerald-700">${segment.title}</h4><p class="text-gray-800">${segment.details}</p>`;
+        });
+        timelineContainer.appendChild(button);
+    });
+
+    detailsContainer.innerHTML = `<h4 class="font-bold text-xl mb-2 text-emerald-700">${courseSegments[0].title}</h4><p class="text-gray-800">${courseSegments[0].details}</p>`;
+    timelineContainer.children[0].classList.add('bg-emerald-100', 'border-emerald-400');
+
+
+    const seasonData = {
+        spring: {
+            title: '🌸 봄: 진달래 능선의 향연',
+            content: '석기봉에서 삼도봉으로 이어지는 능선이 분홍빛 진달래로 물듭니다. 4월 하순~5월 중순이 절정기입니다. 하지만 고산지대는 날씨 변덕이 심하고, 4월 초에도 눈이 내릴 수 있습니다. 1998년 특전사 참사도 4월에 발생했음을 기억하고, 방풍의류와 보온의류를 반드시 챙겨야 합니다.',
+            tips: ['진달래 개화 시기 사전 확인', '변덕스러운 날씨 대비 (방풍/보온 의류)', '일교차 주의']
+        },
+        summer: {
+            title: '🌿 여름: 물한계곡의 오아시스',
+            content: '산행 시작점인 물한계곡은 더위를 식히기에 최적의 장소입니다. 긴 산행 후 시원한 계곡물에 발을 담그는 것은 최고의 보상입니다. 단, 지정된 장소 외 취사 및 야영은 엄격히 금지됩니다. 충분한 수분 섭취는 필수입니다.',
+            tips: ['충분한 물(2L 이상) 준비', '탈수 및 열사병 주의', '계곡 내 취사 금지 준수']
+        },
+        autumn: {
+            title: '🍂 가을: 색의 향연과 파노라마',
+            content: '연중 최고의 조망을 선사하는 계절입니다. 맑고 건조한 날씨 덕분에 정상에서의 360도 파노라마 풍경이 더욱 선명하게 펼쳐집니다. 하지만 해가 짧아지므로, 어둠 속에서 하산하지 않도록 이른 시간에 산행을 시작하고 철저한 시간 계획을 세워야 합니다.',
+            tips: ['짧아진 해 길이 고려', '오후 2시 이전 하산 시작 권장', '일교차 대비 의류 준비']
+        },
+        winter: {
+            title: '❄️ 겨울: 눈과 얼음의 왕국',
+            content: '중부지방 최고의 설산으로 불릴 만큼 아름다운 눈꽃과 설경을 만끽할 수 있습니다. 하지만 황홀한 풍경 뒤에는 큰 위험이 따릅니다. 특히 석기봉 암릉 구간은 눈과 얼음으로 매우 위험해지므로 아이젠, 스패츠, 등산스틱 등 동계 안전장비는 선택이 아닌 필수입니다.',
+            tips: ['아이젠, 스패츠 등 필수 장비 착용', '저체온증 방지 (보온병, 핫팩)', '능선 칼바람 대비 완벽한 방풍/방한 대책']
+        }
+    };
+    
+    const seasonContentContainer = document.getElementById('season-content');
+    const seasonButtons = document.querySelectorAll('.nav-button');
+
+    function updateSeasonContent(season) {
+        const data = seasonData[season];
+        seasonContentContainer.innerHTML = `
+            <div class="p-4">
+                <h3 class="text-2xl font-bold mb-3 text-emerald-600">${data.title}</h3>
+                <p class="mb-4 text-gray-700">${data.content}</p>
+                <div class="p-4 bg-emerald-50 rounded-lg">
+                    <h4 class="font-semibold mb-2">핵심 준비사항</h4>
+                    <ul class="list-disc list-inside text-emerald-800">
+                        ${data.tips.map(tip => `<li>${tip}</li>`).join('')}
+                    </ul>
+                </div>
+            </div>`;
+    }
+
+    seasonButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            seasonButtons.forEach(btn => btn.classList.remove('nav-button-active'));
+            button.classList.add('nav-button-active');
+            const season = button.getAttribute('data-season');
+            updateSeasonContent(season);
+        });
+    });
+
+    updateSeasonContent('spring');
+});
+</script>
+
+</body>
+</html>
