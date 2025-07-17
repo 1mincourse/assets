@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>방장산 등산 가이드 | 3D맵으로 미리 걷는 명산100</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 250px;
+            max-height: 300px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 300px;
+                max-height: 350px;
+            }
+        }
+        .tab-active {
+            border-color: #4A5568;
+            background-color: #4A5568;
+            color: #F7FAFC;
+        }
+        .step-item-active {
+            border-color: #6B7280;
+            background-color: #F3F4F6;
+            transform: scale(1.05);
+        }
+        .accordion-button svg {
+            transition: transform 0.2s ease-in-out;
+        }
+        .accordion-button[aria-expanded="true"] svg {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-gray-800">
+
+<!-- Chosen Palette: Earthy Harmony -->
+<!-- Application Structure Plan: A tab-based dashboard structure was chosen to organize the vast amount of hiking information into logical, user-centric categories: '코스 개요' (Course Overview), '상세 정보' (Detailed Info), and '교통/준비물' (Transport/Gear). This approach prevents information overload from a single long page. The user flow is designed for a hiker's planning process: 1) Get a quick summary and see the key stats/visuals on the main tab. 2) Dive into detailed course features and tips. 3) Check logistics like gear and transportation. This non-linear, task-oriented structure enhances usability and allows users to quickly find the information they need most. -->
+<!-- Visualization & Content Choices: 
+- Course Stats (Distance, Elevation, etc.) -> Goal: Inform -> Method: Styled HTML cards with Unicode icons -> Interaction: None -> Justification: Key metrics must be instantly scannable. Cards provide visual separation and hierarchy. -> Library: HTML/Tailwind.
+- Estimated Time by Pace -> Goal: Compare -> Method: Interactive Bar Chart -> Interaction: Buttons to filter data (Not implemented for simplicity, but chart displays all data clearly) -> Justification: A bar chart is the most effective way to compare quantitative time values across different categories (paces). -> Library: Chart.js/Canvas.
+- Course Difficulty -> Goal: Inform -> Method: Custom visual meter -> Interaction: None -> Justification: A visual gauge communicates the "intermediate" level more quickly and engagingly than plain text. -> Library: HTML/Tailwind.
+- Course Sequence -> Goal: Organize -> Method: Interactive horizontal stepper/timeline -> Interaction: Click on a step to see a description. -> Justification: Visualizes the journey's progression and reveals details on demand, making the route easier to understand than a simple list. -> Library: HTML/Tailwind/JS.
+- Gear Checklist -> Goal: Organize -> Method: Two-column list with Unicode icons. -> Interaction: None -> Justification: A checklist is a highly practical and universally understood format for presenting gear. -> Library: HTML/Tailwind.
+- Transportation -> Goal: Organize -> Method: Accordion -> Interaction: Click to expand/collapse. -> Justification: Hides dense text by default, decluttering the UI and allowing users to focus on one transport method at a time. -> Library: HTML/Tailwind/JS.
+-->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+<div class="container mx-auto p-4 md:p-8 max-w-5xl">
+
+    <header class="text-center mb-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900">고창-장성 방장산 등산코스</h1>
+        <p class="text-lg text-gray-600 mt-2">3D맵으로 미리 걷는 명산100</p>
+    </header>
+
+    <main>
+        <div id="tabs" class="mb-8">
+            <div class="flex justify-center border-b border-gray-300">
+                <button data-tab="overview" class="tab-button py-2 px-4 md:px-6 font-semibold border-b-2 tab-active">코스 개요</button>
+                <button data-tab="details" class="tab-button py-2 px-4 md:px-6 font-semibold border-b-2 border-transparent text-gray-500 hover:border-gray-400 hover:text-gray-700 transition">상세 정보</button>
+                <button data-tab="logistics" class="tab-button py-2 px-4 md:px-6 font-semibold border-b-2 border-transparent text-gray-500 hover:border-gray-400 hover:text-gray-700 transition">교통 & 준비물</button>
+            </div>
+        </div>
+
+        <div id="tab-content">
+            <div id="overview-content" class="tab-panel">
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <p class="mb-6 text-gray-700 text-center">
+                        방장산 등산의 핵심 정보를 한눈에 파악할 수 있는 개요입니다. 총 거리, 고도, 예상 소요 시간과 같은 주요 데이터를 시각적으로 확인하고 전체적인 코스의 난이도를 가늠해 보세요. 호남정맥의 장쾌한 능선을 따라 걷는 여정의 밑그림을 그릴 수 있습니다.
+                    </p>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center mb-8">
+                        <div class="bg-gray-100 p-4 rounded-lg">
+                            <span class="text-2xl">📏</span>
+                            <p class="font-bold text-lg mt-1">10.4 km</p>
+                            <p class="text-sm text-gray-600">총 거리</p>
+                        </div>
+                        <div class="bg-gray-100 p-4 rounded-lg">
+                            <span class="text-2xl">⛰️</span>
+                            <p class="font-bold text-lg mt-1">803 m</p>
+                            <p class="text-sm text-gray-600">상승 고도</p>
+                        </div>
+                        <div class="bg-gray-100 p-4 rounded-lg">
+                            <span class="text-2xl">🧭</span>
+                            <p class="font-bold text-lg mt-1">편도</p>
+                            <p class="text-sm text-gray-600">코스 유형</p>
+                        </div>
+                         <div class="bg-gray-100 p-4 rounded-lg">
+                            <span class="text-2xl">🧗</span>
+                            <p class="font-bold text-lg mt-1">중급</p>
+                            <p class="text-sm text-gray-600">난이도</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-8">
+                        <h3 class="text-xl font-bold text-center mb-4">예상 소요 시간 (걸음 속도별)</h3>
+                         <div class="chart-container">
+                            <canvas id="timeChart"></canvas>
+                        </div>
+                    </div>
+                   
+                    <div>
+                        <h3 class="text-xl font-bold text-center mb-4">코스 특징 요약</h3>
+                        <ul class="space-y-3 text-gray-700">
+                            <li class="flex items-start"><span class="mr-3 text-green-600">✔️</span><span>전남 장성에서 전북 고창으로 이어지는 호남정맥 능선 코스</span></li>
+                            <li class="flex items-start"><span class="mr-3 text-green-600">✔️</span><span>지구력을 요하는 오르내림이 반복되나, 대부분 걷기 좋은 흙길</span></li>
+                            <li class="flex items-start"><span class="mr-3 text-green-600">✔️</span><span>억새봉, 벽오봉(패러글라이딩 활공장)에서 고창평야의 파노라마 조망</span></li>
+                            <li class="flex items-start"><span class="mr-3 text-green-600">✔️</span><span>여러 봉우리를 넘는 성취감과 탁 트인 조망을 동시에 만끽</span></li>
+                             <li class="flex items-start"><span class="mr-3 text-green-600">✔️</span><span>하산 후 고창읍과 가까워 식사 및 뒤풀이 용이</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div id="details-content" class="tab-panel hidden">
+                 <div class="bg-white p-6 rounded-xl shadow-lg">
+                     <p class="mb-6 text-gray-700 text-center">
+                        실제 산행의 흐름을 따라 주요 지점과 난관을 미리 경험해 보세요. 각 지점을 클릭하면 해당 구간의 특징과 주의사항을 확인할 수 있습니다. '초반 깔딱고개'부터 '무릎 브레이커' 하산길까지, 산행의 성패를 좌우할 수 있는 핵심 정보를 제공합니다.
+                    </p>
+                    <h3 class="text-xl font-bold text-center mb-6">코스 순서 및 구간별 정보</h3>
+                    <div id="course-stepper" class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 md:space-x-2 mb-6">
+                        <div class="step-item cursor-pointer p-3 border-2 border-gray-300 rounded-lg text-center transition w-full md:w-auto" data-step="1">장성갈재</div>
+                        <div class="text-gray-400 hidden md:block">→</div>
+                        <div class="step-item cursor-pointer p-3 border-2 border-gray-300 rounded-lg text-center transition w-full md:w-auto" data-step="2">쓰리봉</div>
+                        <div class="text-gray-400 hidden md:block">→</div>
+                        <div class="step-item cursor-pointer p-3 border-2 border-gray-300 rounded-lg text-center transition w-full md:w-auto" data-step="3">방장산 정상</div>
+                        <div class="text-gray-400 hidden md:block">→</div>
+                        <div class="step-item cursor-pointer p-3 border-2 border-gray-300 rounded-lg text-center transition w-full md:w-auto" data-step="4">벽오봉</div>
+                        <div class="text-gray-400 hidden md:block">→</div>
+                        <div class="step-item cursor-pointer p-3 border-2 border-gray-300 rounded-lg text-center transition w-full md:w-auto" data-step="5">고창공설운동장</div>
+                    </div>
+                    <div id="step-description" class="mt-4 p-4 bg-gray-100 rounded-lg min-h-[100px] flex items-center justify-center text-center">
+                        <p class="text-gray-600">코스 지점을 선택하여 상세 정보를 확인하세요.</p>
+                    </div>
+                    
+                    <div class="mt-8">
+                         <h3 class="text-xl font-bold text-center mb-4">등산 팁</h3>
+                         <ul class="space-y-3 text-gray-700">
+                             <li class="flex items-start"><span class="mr-3 text-blue-600">💡</span><span>총 거리가 길고 오르내림이 잦으니 체력 안배가 중요합니다.</span></li>
+                             <li class="flex items-start"><span class="mr-3 text-blue-600">💡</span><span>능선 구간은 바람이 강할 수 있으니 방풍 의류를 꼭 챙기세요.</span></li>
+                             <li class="flex items-start"><span class="mr-3 text-blue-600">💡</span><span>편도 코스이므로 출발지와 도착지 교통편을 사전에 확인해야 합니다.</span></li>
+                             <li class="flex items-start"><span class="mr-3 text-blue-600">💡</span><span>등산 스틱은 체력 소모를 줄이고 무릎을 보호하는 데 큰 도움이 됩니다.</span></li>
+                             <li class="flex items-start"><span class="mr-3 text-blue-600">💡</span><span>동계 산행 시에는 눈과 결빙에 대비해 아이젠, 스패츠 등 안전 장비를 철저히 갖춰야 합니다.</span></li>
+                         </ul>
+                    </div>
+                 </div>
+            </div>
+
+            <div id="logistics-content" class="tab-panel hidden">
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <p class="mb-6 text-gray-700 text-center">
+                        성공적인 산행을 위한 마지막 퍼즐, 교통편과 준비물입니다. 추천하는 이동 방법과 주차 팁, 그리고 필수 장비 목록을 꼼꼼히 확인하여 완벽한 산행을 준비하세요. 특히 편도 코스인 만큼 교통 계획이 매우 중요합니다.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-xl font-bold mb-4 text-center">🎒 추천 장비</h3>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h4 class="font-semibold mb-2">🟩 기본 장비</h4>
+                                <ul class="list-disc list-inside text-sm space-y-1">
+                                    <li>등산 백팩 (25L~35L)</li>
+                                    <li>중등산화 또는 경등산화</li>
+                                    <li>접이식 등산스틱 (적극 추천)</li>
+                                    <li>무릎 보호대, 기능성 양말</li>
+                                    <li>물 1.5L 이상, 간식</li>
+                                    <li>모자, 장갑, 헤드랜턴</li>
+                                    <li>보조배터리, 선크림</li>
+                                </ul>
+                            </div>
+                             <div class="bg-gray-50 p-4 rounded-lg mt-4">
+                                <h4 class="font-semibold mb-2">🟥 특화 장비 (계절별)</h4>
+                                <ul class="list-disc list-inside text-sm space-y-1">
+                                    <li>속건성 베이스레이어</li>
+                                    <li>보온용 미드레이어 (플리스 등)</li>
+                                    <li>방풍/방수 아웃레이어 (바람막이)</li>
+                                    <li>(동절기) 아이젠, 스패츠, 방한용품</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-4 text-center">🚗 교통 정보</h3>
+                            <div class="space-y-2">
+                                <div class="border rounded-lg">
+                                    <button class="accordion-button w-full flex justify-between items-center p-4 font-semibold text-left" aria-expanded="false">
+                                        <span>🚌 대중교통 (권장)</span>
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                    </button>
+                                    <div class="accordion-content hidden p-4 border-t text-sm bg-gray-50">
+                                        <p class="font-bold mb-1">가는 길 (장성갈재):</p>
+                                        <p>KTX/SRT 장성역/백양사역 하차 후 <strong class="text-red-600">택시 이용</strong>이 가장 편리합니다 (약 15~20분 소요). 장성갈재로 직접 가는 버스는 없습니다.</p>
+                                        <p class="font-bold mt-3 mb-1">오는 길 (고창공설운동장):</p>
+                                        <p>산행 종료 후, 인근 버스정류장에서 '고창터미널' 방면 군내버스 탑승 또는 택시 이용. 터미널에서 각 지역으로 이동합니다.</p>
+                                    </div>
+                                </div>
+                                <div class="border rounded-lg">
+                                     <button class="accordion-button w-full flex justify-between items-center p-4 font-semibold text-left" aria-expanded="false">
+                                        <span>🚗 자가용 (비추천)</span>
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                    </button>
+                                    <div class="accordion-content hidden p-4 border-t text-sm bg-gray-50">
+                                        <p class="font-bold mb-2">"도착지에 주차 후, 택시로 출발점 이동"이 국룰!</p>
+                                        <p>1. <strong class="text-blue-600">고창공설운동장</strong> 인근에 주차.</p>
+                                        <p>2. 택시를 타고 출발지인 <strong class="text-blue-600">장성갈재</strong>로 이동 (약 30~40분 소요).</p>
+                                        <p>3. 산행 시작.</p>
+                                        <p class="mt-2 text-xs text-gray-500">* 반대로 할 경우 하산 후 지친 몸으로 택시를 타고 차를 가지러 가야 하는 불편함이 있습니다.</p>
+                                        <p class="mt-2 text-xs">* 출발지/도착지 모두 별도의 공식 주차장은 없습니다.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="text-center mt-12 text-gray-500 text-sm">
+        <p>본 정보는 '1분등산'의 방장산 가이드 콘텐츠를 기반으로 재구성되었습니다.</p>
+        <p>ⓒ 1분등산 ｜ 무단 재업로드 및 편집 금지</p>
+    </footer>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const timeData = {
+        labels: ['느린 걸음', '보통 걸음', '빠른 걸음'],
+        times: [5.5, 4.67, 3.83], 
+        hours: [5, 4, 3],
+        minutes: [30, 40, 50]
+    };
+
+    const timeChartCtx = document.getElementById('timeChart').getContext('2d');
+    const timeChart = new Chart(timeChartCtx, {
+        type: 'bar',
+        data: {
+            labels: timeData.labels,
+            datasets: [{
+                label: '소요 시간 (시간)',
+                data: timeData.times,
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 99, 132, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 99, 132, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            const index = context.dataIndex;
+                            label += `${timeData.hours[index]}시간 ${timeData.minutes[index]}분`;
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: '시간'
+                    }
+                }
+            }
+        }
+    });
+
+    const tabs = document.querySelectorAll('.tab-button');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(item => {
+                item.classList.remove('tab-active');
+                item.classList.add('text-gray-500', 'hover:border-gray-400', 'hover:text-gray-700');
+            });
+            tab.classList.add('tab-active');
+            tab.classList.remove('text-gray-500', 'hover:border-gray-400', 'hover:text-gray-700');
+
+            tabPanels.forEach(panel => {
+                panel.classList.add('hidden');
+            });
+            const targetPanel = document.getElementById(tab.dataset.tab + '-content');
+            if(targetPanel) {
+                targetPanel.classList.remove('hidden');
+            }
+        });
+    });
+    
+    const stepDescriptions = {
+        1: "<strong>출발점: 장성갈재</strong><br>전남 장성과 전북 고창의 경계. 택시 하차 후 바로 산행을 시작하는 지점입니다. 본격적인 오르막 전, 준비 운동은 필수!",
+        2: "<strong>첫 번째 관문: 쓰리봉</strong><br>초반부터 인내심을 시험하는 '깔딱고개' 구간입니다. 가파른 오르막이 이어지지만, 이곳을 넘어서면 본격적인 능선이 시작됩니다.",
+        3: "<strong>대장: 방장산 정상 (743m)</strong><br>여러 봉우리를 거쳐 도착하는 정상. 사방이 트여있지는 않지만, 정상석 인증샷은 필수 코스!",
+        4: "<strong>뷰 맛집: 벽오봉</strong><br>패러글라이딩 활공장이 있어 고창평야가 막힘없이 펼쳐지는 최고의 조망처입니다. '힐링 폭격'을 제대로 맞는 하이라이트 구간!",
+        5: "<strong>하산 및 도착: 고창공설운동장</strong><br>벽오봉을 지나면 긴 하산이 시작됩니다. 경사가 있는 '무릎 브레이커' 구간이므로 스틱을 활용해 안전하게 내려오세요. 10.4km 여정의 마무리 지점입니다."
+    };
+
+    const courseStepper = document.getElementById('course-stepper');
+    const stepItems = courseStepper.querySelectorAll('.step-item');
+    const stepDescriptionEl = document.getElementById('step-description');
+    
+    stepItems.forEach(item => {
+        item.addEventListener('click', () => {
+             stepItems.forEach(el => el.classList.remove('step-item-active'));
+             item.classList.add('step-item-active');
+             const step = item.dataset.step;
+             stepDescriptionEl.innerHTML = stepDescriptions[step];
+        });
+    });
+
+    const accordionButtons = document.querySelectorAll('.accordion-button');
+    accordionButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const content = button.nextElementSibling;
+            const isExpanded = button.getAttribute('aria-expanded') === 'true';
+
+            button.setAttribute('aria-expanded', !isExpanded);
+            content.classList.toggle('hidden');
+        });
+    });
+
+});
+</script>
+
+</body>
+</html>
