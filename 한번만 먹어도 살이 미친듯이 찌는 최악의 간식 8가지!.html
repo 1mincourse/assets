@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>최악의 간식 인터랙티브 분석기</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Neutrals & Subtle Alerts -->
+    <!-- Application Structure Plan: The application is designed as a non-linear, interactive dashboard. It starts with a visual "rogues' gallery" to hook the user. The core is an interactive dashboard where clicking a snack updates dynamic charts (comparative radar chart, individual nutrient breakdown) and informational cards (physiological impact). This is followed by collapsible sections for the "Why" (scientific deep-dive) and "How" (healthy alternatives), allowing progressive disclosure of information. This structure prioritizes user-driven exploration and visual data consumption over a passive, linear reading experience, making complex information more engaging and digestible. -->
+    <!-- Visualization & Content Choices: 1. Snack Comparison: A dynamic radar chart (Chart.js) compares all 8 snacks on a user-selected metric (Calories, Sugar, etc.) for easy cross-comparison. 2. Nutrient Breakdown: Horizontal bar charts (Chart.js) show a selected snack's nutrients as a percentage of daily values, making the impact immediately understandable. 3. Physiological Impact: Icon-based cards (HTML/Tailwind) quickly convey health risks. 4. Healthy Alternatives: "Before and After" cards visually demonstrate the benefits of switching, using color-coding (red for danger, green for healthy) to reinforce the message. All choices are designed to transform the report's text into interactive, easily understandable visual formats without using SVG or Mermaid. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #F8F7F3;
+            color: #333;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nutrient-bar-container {
+            position: relative;
+            width: 100%;
+            height: 120px;
+        }
+        .snack-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .snack-card:hover, .snack-card.active {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .snack-card.active {
+            border-color: #E57373;
+            border-width: 2px;
+        }
+        .smooth-scroll {
+            scroll-behavior: smooth;
+        }
+        .tab-button.active {
+            border-color: #E57373;
+            background-color: #FEF2F2;
+            color: #B91C1C;
+        }
+    </style>
+</head>
+<body class="bg-[#F8F7F3] smooth-scroll">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+        
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">한 번만 먹어도 살찌는 간식,</h1>
+            <h2 class="text-2xl md:text-3xl font-bold text-[#E57373]">그 위험성을 파헤치다</h2>
+            <p class="mt-4 text-gray-600 max-w-3xl mx-auto">맛있어서 무심코 먹었던 간식들이 우리 몸에 미치는 영향을 과학적으로 분석하고, 건강한 대안을 제시합니다. 아래에서 간식을 선택하여 그 실체를 확인해보세요.</p>
+        </header>
+
+        <main>
+            <section id="rogue-gallery" class="mb-16">
+                <h3 class="text-2xl font-bold text-center mb-8 text-gray-700">분석할 간식을 선택하세요</h3>
+                <div id="snack-selector" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+                </div>
+            </section>
+
+            <section id="analysis-dashboard" class="bg-white p-6 rounded-2xl shadow-lg mb-16 min-h-[500px]">
+                <div id="welcome-message" class="flex flex-col items-center justify-center text-center h-full">
+                    <span class="text-5xl mb-4">🍽️</span>
+                    <h3 class="text-2xl font-bold text-gray-700">간식을 선택해주세요</h3>
+                    <p class="text-gray-500 mt-2">선택한 간식의 상세 영양 정보와 신체에 미치는 영향을 보여드립니다.</p>
+                </div>
+                <div id="dashboard-content" class="hidden">
+                    <h2 id="snack-title" class="text-3xl font-bold text-center mb-8 text-gray-800"></h2>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="flex flex-col">
+                            <h4 class="text-xl font-semibold mb-4 text-center text-gray-700">주요 영양 성분 분석</h4>
+                            <div class="nutrient-bar-container">
+                                <canvas id="nutrientChart"></canvas>
+                            </div>
+                            <div id="nutrient-details" class="mt-4 text-sm text-gray-600 bg-gray-50 p-4 rounded-lg"></div>
+                        </div>
+                        <div class="flex flex-col">
+                            <h4 class="text-xl font-semibold mb-4 text-center text-gray-700">신체에 미치는 영향</h4>
+                            <div id="impact-cards" class="grid grid-cols-2 gap-4"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="comparison-section" class="mb-16">
+                <h3 class="text-2xl font-bold text-center mb-2 text-gray-700">간식별 위험도 비교</h3>
+                <p class="text-center text-gray-600 mb-6">아래 메뉴에서 비교하고 싶은 영양소를 선택하세요.</p>
+                <div class="flex justify-center mb-4">
+                    <select id="radar-metric-selector" class="p-2 border rounded-lg bg-white shadow-sm">
+                        <option value="calories">열량 (kcal)</option>
+                        <option value="sugar">총 당류 (g)</option>
+                        <option value="fat">포화지방 (g)</option>
+                        <option value="sodium">나트륨 (mg)</option>
+                    </select>
+                </div>
+                <div class="chart-container bg-white p-4 rounded-2xl shadow-lg">
+                    <canvas id="radarChart"></canvas>
+                </div>
+            </section>
+
+            <section id="deep-dive" class="mb-16">
+                <h3 class="text-2xl font-bold text-center mb-8 text-gray-700">왜 위험할까? 과학적 원리 탐구</h3>
+                <div class="max-w-4xl mx-auto">
+                    <div class="border-b border-gray-200">
+                        <nav id="science-tabs" class="-mb-px flex space-x-4" aria-label="Tabs">
+                        </nav>
+                    </div>
+                    <div id="science-content" class="mt-8">
+                    </div>
+                </div>
+            </section>
+
+            <section id="alternatives">
+                <h3 class="text-2xl font-bold text-center mb-8 text-gray-700">그렇다면 대안은? 건강한 간식으로 바꾸기</h3>
+                <div id="alternative-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center mt-16 pt-8 border-t border-gray-200">
+            <p class="text-sm text-gray-500">본 정보는 제공된 보고서를 기반으로 하며, 교육적 목적으로 제작되었습니다. 정확한 영양 정보는 제품별 표시사항을 확인하세요.</p>
+        </footer>
+    </div>
+
+    <script>
+        const snackData = [
+            { id: 'tanghulu', name: '탕후루', emoji: '🍓', calories: 190, sugar: 25, fat: 0, sodium: 5, description: '과일이라는 건강한 이미지 뒤에 숨은 단순당 폭탄. 혈당을 급격히 올려 비만을 부르는 지름길입니다.', impacts: ['sugar_spike', 'dental_health'], alternative: { name: '신선한 과일', improvement: '첨가당 100% 감소, 식이섬유 섭취' } },
+            { id: 'macaron', name: '마카롱', emoji: '🍪', calories: 183, sugar: 15, fat: 5, sodium: 70, description: '작지만 강력한 칼로리. 1개만 먹어도 밥 반 공기 열량이며, 포만감이 적어 과식하기 쉽습니다.', impacts: ['sugar_spike', 'high_fat', 'empty_calories'], alternative: { name: '홈메이드 통밀 쿠키', improvement: '정제당 및 포화지방 대폭 감소' } },
+            { id: 'donut', name: '도넛', emoji: '🍩', calories: 210, sugar: 14, fat: 5.9, sodium: 227, description: '기름에 튀긴 밀가루와 설탕의 조합. 특히 트랜스지방은 혈관 건강에 최악입니다.', impacts: ['sugar_spike', 'high_fat', 'trans_fat'], alternative: { name: '오븐에 구운 도넛', improvement: '지방 54%, 포화지방 49% 감소' } },
+            { id: 'cake', name: '조각 케이크', emoji: '🍰', calories: 470, sugar: 28, fat: 20, sodium: 95, description: '생크림, 설탕, 정제 밀가루의 집합체. 한 조각에 1일 권장 포화지방을 훌쩍 넘길 수 있습니다.', impacts: ['sugar_spike', 'high_fat', 'empty_calories'], alternative: { name: '저당 통밀 케이크', improvement: '정제당, 포화지방 대폭 감소' } },
+            { id: 'chips', name: '감자칩', emoji: '🥔', calories: 367, sugar: 1, fat: 14, sodium: 380, description: '고칼로리, 고나트륨, 고지방의 대표주자. 짠맛과 기름진 맛에 멈출 수 없이 먹게 됩니다.', impacts: ['high_fat', 'high_sodium'], alternative: { name: '에어프라이어 감자칩', improvement: '지방 78%, 나트륨 49% 감소' } },
+            { id: 'tteokbokki', name: '떡볶이', emoji: '🌶️', calories: 295, sugar: 16, fat: 1, sodium: 1207, description: '정제 탄수화물 떡과 고당분/고나트륨 양념의 만남. 나트륨 폭탄으로 몸을 붓게 만듭니다.', impacts: ['sugar_spike', 'high_sodium', 'empty_calories'], alternative: { name: '채소 듬뿍 저염 떡볶이', improvement: '나트륨 50%, 당류 50% 감소' } },
+            { id: 'ramyeon_kimbap', name: '라면과 김밥', emoji: '🍜', calories: 983, sugar: 10, fat: 27.7, sodium: 3062, description: '탄수화물+탄수화물의 최악의 조합. 혈당 롤러코스터와 나트륨 과다 섭취를 유발합니다.', impacts: ['sugar_spike', 'high_sodium', 'over_calories'], alternative: { name: '채소 라면 + 현미 김밥', improvement: '나트륨, 정제탄수화물 감소, 식이섬유 증가' } },
+            { id: 'soda', name: '가당음료', emoji: '🥤', calories: 152, sugar: 38, fat: 0, sodium: 15, description: '마시는 설탕물. 포만감 없이 높은 칼로리를 그대로 흡수시켜 지방으로 쉽게 전환됩니다.', impacts: ['sugar_spike', 'empty_calories', 'fatty_liver'], alternative: { name: '탄산수와 레몬', improvement: '당류 100% 감소' } },
+        ];
+
+        const impactData = {
+            sugar_spike: { icon: '🩸📈', title: '혈당 스파이크', description: '단순당이 혈당을 급격히 올려 인슐린 저항성 및 당뇨 위험을 높입니다.' },
+            high_fat: { icon: '🧈⚠️', title: '과도한 포화지방', description: '나쁜 콜레스테롤(LDL) 수치를 높여 심혈관 질환의 위험을 증가시킵니다.' },
+            trans_fat: { icon: '❤️‍🩹', title: '트랜스지방 위험', description: 'LDL 콜레스테롤은 높이고 좋은 HDL 콜레스테롤은 낮춰 혈관 건강에 치명적입니다.' },
+            high_sodium: { icon: '🧂💧', title: '높은 나트륨', description: '몸을 붓게 하고 장기적으로 혈압을 높여 고혈압의 원인이 됩니다.' },
+            empty_calories: { icon: '👻⚡', title: '빈 칼로리', description: '영양소 없이 열량만 높아 포만감을 주지 못하고 과식을 유발합니다.' },
+            over_calories: { icon: '💥🍽️', title: '칼로리 폭탄', description: '한 끼 식사를 초과하는 열량으로 체중 증가의 직접적인 원인이 됩니다.' },
+            dental_health: { icon: '🦷😥', title: '치아 건강 위협', description: '끈적한 설탕이 치아에 달라붙어 충치 및 손상 위험을 높입니다.' },
+            fatty_liver: { icon: '🍺➡️肝', title: '지방간 위험', description: '액상과당은 간에서 지방으로 쉽게 전환되어 비알코올성 지방간을 유발할 수 있습니다.' }
+        };
+        
+        const scienceData = [
+            { 
+                id: 'science1', 
+                title: '혈당 롤러코스터', 
+                content: `단순당과 정제 탄수화물이 많은 간식은 혈당을 매우 빠르게 높이는 '혈당 스파이크'를 유발합니다. 이에 우리 몸은 다량의 인슐린을 분비해 혈당을 급격히 떨어뜨리죠. 이 과정이 반복되면 세포가 인슐린에 둔감해지는 '인슐린 저항성'이 생겨 제2형 당뇨병, 비만, 대사 증후군의 원인이 됩니다.`
+            },
+            { 
+                id: 'science2', 
+                title: '나쁜 지방의 과학', 
+                content: `모든 지방이 같지 않습니다. 튀긴 음식이나 가공식품에 많은 포화지방과 트랜스지방은 혈관에 '나쁜' LDL 콜레스테롤을 쌓이게 합니다. 특히 트랜스지방은 '좋은' HDL 콜레스테롤까지 낮춰 동맥경화, 심근경색 등 심혈관 질환의 위험을 극적으로 높이는 최악의 지방입니다.`
+            },
+            { 
+                id: 'science3', 
+                title: '나트륨의 습격', 
+                content: `짠 간식을 먹으면 몸이 붓는 이유는 나트륨이 체내 수분을 붙잡기 때문입니다. 이는 일시적으로 체중을 늘리고 혈액량을 증가시켜 혈압을 높입니다. 만성적인 나트륨 과다 섭취는 고혈압의 직접적인 원인이 되어 심장과 신장에 큰 부담을 줍니다.`
+            },
+            { 
+                id: 'science4', 
+                title: '빈 칼로리의 함정', 
+                content: `'빈 칼로리' 식품은 비타민, 미네랄, 식이섬유 같은 필수 영양소는 거의 없이 열량만 높습니다. 포만감을 주는 단백질이나 식이섬유가 없어 많이 먹어도 만족감을 느끼기 어렵고, 뇌는 계속해서 허기 신호를 보내 결국 과식으로 이어지는 악순환을 만듭니다.`
+            }
+        ];
+
+        let nutrientChart, radarChart;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const snackSelector = document.getElementById('snack-selector');
+            const alternativeCards = document.getElementById('alternative-cards');
+            const scienceTabs = document.getElementById('science-tabs');
+            const scienceContent = document.getElementById('science-content');
+
+            snackData.forEach(snack => {
+                const card = document.createElement('div');
+                card.className = 'snack-card cursor-pointer bg-white p-4 rounded-lg shadow-md border-2 border-transparent text-center';
+                card.dataset.id = snack.id;
+                card.innerHTML = `<div class="text-4xl mb-2">${snack.emoji}</div><h4 class="font-semibold">${snack.name}</h4>`;
+                card.addEventListener('click', () => selectSnack(snack.id));
+                snackSelector.appendChild(card);
+
+                const altCard = document.createElement('div');
+                altCard.className = 'bg-white p-6 rounded-2xl shadow-lg flex flex-col justify-between';
+                altCard.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-sm text-gray-500">대상이 되는 간식</p>
+                                <h4 class="text-xl font-bold text-red-500">${snack.emoji} ${snack.name}</h4>
+                            </div>
+                            <span class="text-2xl transform rotate-45 text-gray-400">&rarr;</span>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">건강한 대안</p>
+                            <h4 class="text-xl font-bold text-green-600">${snack.alternative.name}</h4>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t">
+                        <p class="font-semibold text-green-700">✨ 개선 효과</p>
+                        <p class="text-sm text-gray-600">${snack.alternative.improvement}</p>
+                    </div>
+                `;
+                alternativeCards.appendChild(altCard);
+            });
+            
+            scienceData.forEach((item, index) => {
+                const tabButton = document.createElement('button');
+                tabButton.className = 'tab-button whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300';
+                tabButton.textContent = item.title;
+                tabButton.dataset.target = item.id;
+                if (index === 0) {
+                    tabButton.classList.add('active');
+                }
+                tabButton.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                    tabButton.classList.add('active');
+                    displayScienceContent(item.id);
+                });
+                scienceTabs.appendChild(tabButton);
+            });
+            
+            displayScienceContent(scienceData[0].id);
+            setupRadarChart();
+            document.getElementById('radar-metric-selector').addEventListener('change', (e) => updateRadarChart(e.target.value));
+        });
+        
+        function displayScienceContent(id) {
+            const contentData = scienceData.find(item => item.id === id);
+            const scienceContentEl = document.getElementById('science-content');
+            scienceContentEl.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-inner"><p class="text-gray-700 leading-relaxed">${contentData.content}</p></div>`;
+        }
+
+        function selectSnack(snackId) {
+            const selectedSnack = snackData.find(s => s.id === snackId);
+            
+            document.getElementById('welcome-message').classList.add('hidden');
+            document.getElementById('dashboard-content').classList.remove('hidden');
+
+            document.querySelectorAll('.snack-card').forEach(card => {
+                card.classList.remove('active');
+                if (card.dataset.id === snackId) {
+                    card.classList.add('active');
+                }
+            });
+
+            document.getElementById('snack-title').textContent = `${selectedSnack.emoji} ${selectedSnack.name}`;
+            
+            const nutrientDetailsEl = document.getElementById('nutrient-details');
+            nutrientDetailsEl.innerHTML = `<p>${selectedSnack.description}</p>`;
+
+            const impactCardsEl = document.getElementById('impact-cards');
+            impactCardsEl.innerHTML = '';
+            selectedSnack.impacts.forEach(impactId => {
+                const impact = impactData[impactId];
+                const card = document.createElement('div');
+                card.className = 'bg-red-50 p-4 rounded-lg';
+                card.innerHTML = `
+                    <div class="flex items-center mb-2">
+                        <span class="text-2xl mr-2">${impact.icon}</span>
+                        <h5 class="font-bold text-red-800">${impact.title}</h5>
+                    </div>
+                    <p class="text-xs text-red-700">${impact.description}</p>
+                `;
+                impactCardsEl.appendChild(card);
+            });
+
+            updateNutrientChart(selectedSnack);
+            
+            document.getElementById('analysis-dashboard').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function updateNutrientChart(snack) {
+            const dailyValues = { sugar: 50, fat: 15, sodium: 2000 };
+            const data = {
+                labels: ['총 당류 (g)', '포화지방 (g)', '나트륨 (mg)'],
+                datasets: [{
+                    label: snack.name,
+                    data: [
+                        (snack.sugar / dailyValues.sugar) * 100,
+                        (snack.fat / dailyValues.fat) * 100,
+                        (snack.sodium / dailyValues.sodium) * 100
+                    ],
+                    backgroundColor: ['#F87171', '#FBBF24', '#60A5FA'],
+                    borderColor: ['#EF4444', '#D97706', '#2563EB'],
+                    borderWidth: 1
+                }]
+            };
+
+            const ctx = document.getElementById('nutrientChart').getContext('2d');
+            if (nutrientChart) {
+                nutrientChart.destroy();
+            }
+            nutrientChart = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.x !== null) {
+                                        label += `${context.parsed.x.toFixed(1)}% (1일 권장량 대비)`;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 150,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function setupRadarChart() {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            radarChart = new Chart(ctx, {
+                type: 'radar',
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    return tooltipItems[0].label;
+                                },
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.formattedValue}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            angleLines: { display: false },
+                            suggestedMin: 0,
+                            pointLabels: {
+                                font: { size: 12 }
+                            }
+                        }
+                    }
+                }
+            });
+            updateRadarChart('calories');
+        }
+
+        function updateRadarChart(metric) {
+            const labels = snackData.map(s => s.name);
+            const dataPoints = snackData.map(s => s[metric]);
+
+            radarChart.data = {
+                labels: labels,
+                datasets: [{
+                    label: document.querySelector(`#radar-metric-selector option[value=${metric}]`).textContent,
+                    data: dataPoints,
+                    fill: true,
+                    backgroundColor: 'rgba(229, 115, 115, 0.2)',
+                    borderColor: 'rgb(229, 115, 115)',
+                    pointBackgroundColor: 'rgb(229, 115, 115)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgb(229, 115, 115)'
+                }]
+            };
+            radarChart.update();
+        }
+
+    </script>
+</body>
+</html>
