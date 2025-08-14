@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아침 공복, 무엇을 먹어야 할까? | 대화형 건강 가이드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: The application is structured into four thematic, interactive sections to guide the user from general concepts to personalized advice, which is more intuitive than the linear report format. 1. **Hero Section:** Grabs attention and introduces the core problem. 2. **Interactive Food Explorer:** The main interactive component, allowing users to explore 'Recommended' and 'Cautionary' foods through clickable cards and a comparative chart. This encourages self-directed discovery. 3. **Personalized Plate Builder:** Translates knowledge into action by letting users select a health goal (e.g., Gut Health) and receive tailored food recommendations and synergistic meal ideas. 4. **Myth Busters & Core Principles:** Addresses common misinformation and summarizes key takeaways, reinforcing the report's scientific foundation. This structure prioritizes user engagement and practical application over passive reading. -->
+    <!-- Visualization & Content Choices: 
+        - **Food Comparison (Goal: Compare, Inform):** A horizontal bar chart (Chart.js) visually ranks recommended foods by their 'expert rating' score, providing a quick, high-level overview. This is more engaging than the static table in the report.
+        - **Detailed Food Info (Goal: Inform, Organize):** Clickable cards (HTML/Tailwind/JS) reveal detailed information in a structured format (Claim, Scientific Reality, Key Compound). This prevents information overload on the main screen.
+        - **Personalized Recommendations (Goal: Guide, Organize):** Interactive filter buttons (HTML/JS) dynamically highlight relevant foods and display tailored meal suggestions. This makes the report's advice actionable and user-centric.
+        - **Myth Busters (Goal: Inform, Correct):** A simple 'Myth vs. Fact' layout (HTML/Tailwind) clearly debunks common misinformation, enhancing the app's credibility.
+        - **Core Principles (Goal: Organize, Inform):** A styled, numbered list (HTML/Tailwind) visualizes the hierarchical approach to building a breakfast, making the concept easy to remember.
+        - **CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.** -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #FDFBF8;
+            color: #4A4A4A;
+        }
+        .hero-gradient {
+            background: linear-gradient(180deg, #FDFBF8 0%, #FAEFE3 100%);
+        }
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .active-nav {
+            color: #D97706;
+            border-bottom: 2px solid #D97706;
+        }
+        .inactive-nav {
+            color: #6B7280;
+            border-bottom: 2px solid transparent;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 500px;
+            }
+        }
+        .btn-filter {
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-filter.active {
+            background-color: #F59E0B;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .highlight-food {
+            border: 2px solid #F59E0B;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="sticky top-0 bg-white/80 backdrop-blur-sm z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-amber-700">☀️ 아침 건강 가이드</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#explorer" class="text-gray-600 hover:text-amber-700 px-3 py-2 rounded-md text-sm font-medium">음식 탐색기</a>
+                        <a href="#builder" class="text-gray-600 hover:text-amber-700 px-3 py-2 rounded-md text-sm font-medium">식단 구성하기</a>
+                        <a href="#myths" class="text-gray-600 hover:text-amber-700 px-3 py-2 rounded-md text-sm font-medium">오해와 진실</a>
+                        <a href="#principles" class="text-gray-600 hover:text-amber-700 px-3 py-2 rounded-md text-sm font-medium">핵심 원칙</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero-gradient pt-16 pb-20 text-center">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-4xl md:text-5xl font-extrabold text-gray-800 leading-tight">
+                    의사들이 추천하는 <span class="text-amber-600">아침 공복</span> 최고의 음식
+                </h2>
+                <p class="mt-6 max-w-2xl mx-auto text-lg text-gray-600">
+                    매일 아침, 당신의 첫 식사가 하루의 컨디션과 장기적인 건강을 결정합니다.
+                    단순한 '카더라'를 넘어, 과학적 근거에 기반한 최적의 아침 식단을 탐색하고 나에게 맞는 건강한 습관을 만들어보세요.
+                </p>
+                <a href="#explorer" class="mt-8 inline-block bg-amber-600 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-amber-700 transition-transform transform hover:scale-105">
+                    지금 바로 시작하기
+                </a>
+            </div>
+        </section>
+
+        <section id="explorer" class="py-20 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold text-gray-800">아침 음식 탐색기</h3>
+                    <p class="mt-2 text-gray-600">아침 공복에 추천하는 음식과 주의가 필요한 음식을 과학적 근거와 함께 살펴보세요.</p>
+                </div>
+
+                <div class="mb-12">
+                    <div class="chart-container">
+                        <canvas id="foodRatingChart"></canvas>
+                    </div>
+                    <p class="text-center text-sm text-gray-500 mt-4">각 음식의 전문가 추천 점수를 비교해보세요. 점수가 높을수록 보편적으로 추천되는 음식입니다.</p>
+                </div>
+
+                <div class="border-b border-gray-200 mb-8">
+                    <nav class="-mb-px flex justify-center space-x-8" aria-label="Tabs">
+                        <button id="tab-recommended" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm active-nav">
+                            👍 추천하는 음식
+                        </button>
+                        <button id="tab-caution" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm inactive-nav">
+                            🤔 주의가 필요한 음식
+                        </button>
+                    </nav>
+                </div>
+
+                <div id="content-recommended">
+                    <div id="recommended-foods-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    </div>
+                </div>
+                <div id="content-caution" class="hidden">
+                     <div id="caution-foods-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    </div>
+                </div>
+                
+                <div id="food-details-container" class="mt-12 p-8 bg-amber-50 rounded-2xl shadow-inner hidden">
+                </div>
+            </div>
+        </section>
+
+        <section id="builder" class="py-20 bg-gray-50">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold text-gray-800">내 몸 맞춤 아침 식단 구성하기</h3>
+                    <p class="mt-2 text-gray-600">나의 건강 목표에 따라 최적의 아침 식단을 추천해 드립니다. 목표를 선택해보세요.</p>
+                </div>
+                <div id="goal-filters" class="flex flex-wrap justify-center gap-3 mb-8">
+                    <button data-goal="energy" class="btn-filter bg-white py-2 px-5 rounded-full shadow-sm font-medium text-gray-700 hover:bg-amber-100">⚡️ 에너지 & 집중력</button>
+                    <button data-goal="gut" class="btn-filter bg-white py-2 px-5 rounded-full shadow-sm font-medium text-gray-700 hover:bg-amber-100">🌿 장 건강 & 규칙성</button>
+                    <button data-goal="stomach" class="btn-filter bg-white py-2 px-5 rounded-full shadow-sm font-medium text-gray-700 hover:bg-amber-100">😌 위 편안함 & 진정</button>
+                </div>
+                <div id="recommendation-result" class="mt-8 text-center p-8 bg-white rounded-2xl shadow-md min-h-[150px]">
+                    <p class="text-gray-500">위의 건강 목표를 선택하면, 여기에 맞춤 식단 예시와 추천 음식이 표시됩니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="myths" class="py-20 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold text-gray-800">아침 식사에 대한 오해와 진실</h3>
+                    <p class="mt-2 text-gray-600">잘못 알려진 상식을 바로잡고, 과학적 사실에 기반해 판단하세요.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <div class="bg-red-50 p-6 rounded-lg border border-red-200">
+                        <h4 class="font-bold text-lg text-red-800">❌ 오해: "공복에 바나나는 해롭다"</h4>
+                        <p class="mt-2 text-gray-700">
+                            **주장:** 혈중 마그네슘 수치가 급격히 올라가 심장에 무리를 준다.
+                            <br><br>
+                            **진실:** 건강한 신장은 바나나 한두 개 정도의 마그네슘은 충분히 조절할 수 있습니다. 이는 심각한 신장 질환 환자에게만 해당되는 극히 예외적인 경우입니다. 오히려 당도가 높아 혈당을 빠르게 올릴 수 있다는 점을 고려하는 것이 더 중요합니다.
+                        </p>
+                    </div>
+                    <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
+                        <h4 class="font-bold text-lg text-blue-800">✅ 진실: "우유는 위산 때문이 아니다"</h4>
+                        <p class="mt-2 text-gray-700">
+                            **주장:** 우유가 위산을 과다 분비시켜 공복에 나쁘다.
+                            <br><br>
+                            **진실:** 단백질이 든 모든 음식은 소화를 위해 위산을 분비시키며, 이는 정상적인 과정입니다. 우유로 인한 불편함의 진짜 원인은 대부분 '유당불내증'입니다. 유당 분해 효소가 부족해 소화 불량을 겪는 것이 문제이지, 위산 자극 자체가 해로운 것은 아닙니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="principles" class="py-20 bg-gray-50">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold text-gray-800">최적의 아침 식사 5단계 원칙</h3>
+                    <p class="mt-2 text-gray-600">이상적인 아침 식사를 구성하는 계층적 접근법입니다. 이 순서를 따라보세요.</p>
+                </div>
+                <div class="max-w-2xl mx-auto space-y-4">
+                    <div class="flex items-start space-x-4 p-4 bg-white rounded-lg shadow-sm">
+                        <div class="flex-shrink-0 w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-xl">1</div>
+                        <div>
+                            <h4 class="font-bold text-lg">수분 공급으로 시작</h4>
+                            <p class="text-gray-600">미지근한 물 한 잔으로 밤새 손실된 수분을 보충하고 소화기관을 깨웁니다.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-4 p-4 bg-white rounded-lg shadow-sm">
+                        <div class="flex-shrink-0 w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center font-bold text-xl">2</div>
+                        <div>
+                            <h4 class="font-bold text-lg">단백질을 최우선으로</h4>
+                            <p class="text-gray-600">달걀, 그릭 요거트 등으로 포만감을 높이고 혈당을 안정시킵니다.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-4 p-4 bg-white rounded-lg shadow-sm">
+                        <div class="flex-shrink-0 w-12 h-12 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center font-bold text-xl">3</div>
+                        <div>
+                            <h4 class="font-bold text-lg">복합 탄수화물 & 섬유질 통합</h4>
+                            <p class="text-gray-600">오트밀, 사과 등으로 에너지를 서서히 공급하고 장 건강을 지원합니다.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-4 p-4 bg-white rounded-lg shadow-sm">
+                        <div class="flex-shrink-0 w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center font-bold text-xl">4</div>
+                        <div>
+                            <h4 class="font-bold text-lg">건강한 지방 추가</h4>
+                            <p class="text-gray-600">아보카도, 견과류로 포만감을 더하고 호르몬 생성을 돕습니다.</p>
+                        </div>
+                    </div>
+                     <div class="flex items-start space-x-4 p-4 bg-white rounded-lg shadow-sm">
+                        <div class="flex-shrink-0 w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center font-bold text-xl">5</div>
+                        <div>
+                            <h4 class="font-bold text-lg">미량 영양소로 마무리</h4>
+                            <p class="text-gray-600">블루베리, 양배추 등으로 항산화 및 항염증 효과를 더합니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white">
+        <div class="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center">
+            <p>&copy; 2024 대화형 건강 가이드. 모든 정보는 과학적 분석 보고서에 기반하며, 의학적 조언을 대체할 수 없습니다.</p>
+        </div>
+    </footer>
+
+    <script>
+        const foodData = {
+            recommended: [
+                { id: 'water', name: '미지근한 물', icon: '💧', claim: '노폐물 배출, 혈액순환 개선', science: '수면 중 손실된 수분을 보충하고 혈액 점도를 낮춰 심혈관 부담을 줄입니다. 또한 위대장 반사를 촉진하여 원활한 배변 활동을 돕습니다.', compound: '수분', rating: 5, goals: ['energy', 'gut', 'stomach'] },
+                { id: 'egg', name: '삶은 달걀', icon: '🥚', claim: '고품질 단백질, 뇌 기능 활성화', science: '완전 단백질이 포만감을 높이고 혈당을 안정시킵니다. 풍부한 콜린 성분은 뇌 기능에 필수적인 신경전달물질의 생성을 돕습니다.', compound: '단백질, 콜린', rating: 5, goals: ['energy'] },
+                { id: 'oatmeal', name: '오트밀', icon: '🥣', claim: '위 점막 보호, 콜레스테롤 감소', science: '수용성 섬유질인 베타글루칸이 위에서 젤을 형성해 위벽을 코팅하고 보호합니다. 또한 혈당을 서서히 올려 에너지를 꾸준히 공급합니다.', compound: '베타글루칸', rating: 5, goals: ['gut', 'stomach'] },
+                { id: 'cabbage', name: '양배추', icon: '🥬', claim: '위 점막 재생 및 보호', science: '비타민 U(MMSC) 성분이 위벽 세포를 강화하고 손상된 조직의 치유를 촉진합니다. 위염이나 위궤양이 있는 사람에게 특히 유익합니다.', compound: '비타민 U (MMSC)', rating: 5, goals: ['stomach'] },
+                { id: 'potato', name: '감자', icon: '🥔', claim: '속 쓰림 예방, 위벽 코팅', science: '감자의 녹말 성분이 위 점막에 보호막을 형성하고, 알칼리성 성분이 위산을 중화시켜 속 쓰림 완화에 도움을 줍니다.', compound: '녹말', rating: 4, goals: ['stomach'] },
+                { id: 'blueberry', name: '블루베리', icon: '🫐', claim: '강력한 항산화, 뇌/눈 건강', science: '안토시아닌이라는 강력한 항산화 물질이 뇌세포 노화를 막고, 눈의 로돕신 재생을 도와 시각 기능을 지원합니다.', compound: '안토시아닌', rating: 5, goals: ['energy'] },
+                { id: 'yogurt', name: '그릭 요거트', icon: '🍦', claim: '장 건강, 풍부한 단백질', science: '고단백 식품으로 포만감이 높습니다. 프로바이오틱스는 장에 도달하면 유익하지만, 위산에 의해 일부 파괴될 수 있어 섬유질과 함께 섭취하는 것이 좋습니다.', compound: '단백질, 프로바이오틱스', rating: 3, goals: ['energy', 'gut'] },
+                { id: 'apple', name: '사과', icon: '🍎', claim: '장운동 활성화, 유해물질 배출', science: '껍질에 풍부한 펙틴은 장내 유익균의 먹이가 되는 프리바이오틱스로, 장내 환경을 근본적으로 개선하고 건강한 단쇄지방산을 생성합니다.', compound: '펙틴', rating: 5, goals: ['gut'] }
+            ],
+            caution: [
+                { id: 'coffee', name: '커피', icon: '☕️', reason: '위산 분비를 촉진하고 하부식도괄약근을 이완시켜 빈속에 자극적일 수 있으며, 위염이나 역류성 식도염 증상을 악화시킬 수 있습니다.', riskGroup: '위염, GERD 환자' },
+                { id: 'sugar', name: '정제 설탕/단순당', icon: '🍩', reason: '혈당을 급격히 올렸다가 떨어뜨리는 \'혈당 롤러코스터\' 현상을 유발하여 피로감과 재허기를 빠르게 느끼게 합니다.', riskGroup: '모두 (특히 당뇨/인슐린 저항성)' },
+                { id: 'spicy', name: '매운 음식', icon: '🌶️', reason: '캡사이신 성분이 민감한 위 점막을 직접적으로 자극하여 통증이나 속 쓰림을 유발할 수 있습니다.', riskGroup: '위가 약한 사람, 위염 환자' },
+                { id: 'citrus', name: '감귤류 과일', icon: '🍊', reason: '강한 산성이 위 내 pH를 더욱 낮춰, 위염이나 위궤양이 있는 사람에게 속 쓰림 등 불편함을 유발할 수 있습니다.', riskGroup: '위염, GERD 환자' },
+                { id: 'rawveg', name: '생채소', icon: '🥦', reason: '다량의 불용성 섬유질이 민감한 장에서 가스와 복부 팽만감을 유발할 수 있습니다. 특히 과민성 대장 증후군 환자는 주의가 필요합니다.', riskGroup: '과민성 대장 증후군(IBS) 환자' }
+            ]
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const recommendedGrid = document.getElementById('recommended-foods-grid');
+            const cautionGrid = document.getElementById('caution-foods-grid');
+            const detailsContainer = document.getElementById('food-details-container');
+            const tabRecommended = document.getElementById('tab-recommended');
+            const tabCaution = document.getElementById('tab-caution');
+            const contentRecommended = document.getElementById('content-recommended');
+            const contentCaution = document.getElementById('content-caution');
+            const goalFilters = document.getElementById('goal-filters');
+            const recommendationResult = document.getElementById('recommendation-result');
+
+            function createFoodCard(food, type) {
+                const card = document.createElement('div');
+                card.className = 'card bg-white p-4 rounded-xl shadow-md cursor-pointer flex flex-col items-center text-center border-2 border-transparent';
+                card.dataset.id = food.id;
+                card.dataset.type = type;
+
+                card.innerHTML = `
+                    <div class="text-4xl mb-2">${food.icon}</div>
+                    <h4 class="font-bold text-gray-800">${food.name}</h4>
+                    <p class="text-sm text-gray-500">${type === 'recommended' ? food.claim : ''}</p>
+                `;
+                
+                card.addEventListener('click', () => {
+                    showDetails(food, type);
+                    document.querySelectorAll('.card').forEach(c => c.classList.remove('ring-2', 'ring-amber-500'));
+                    card.classList.add('ring-2', 'ring-amber-500');
+                    detailsContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
+                return card;
+            }
+
+            function showDetails(food, type) {
+                detailsContainer.classList.remove('hidden');
+                if (type === 'recommended') {
+                    detailsContainer.innerHTML = `
+                        <div class="flex items-start space-x-4">
+                            <div class="text-5xl">${food.icon}</div>
+                            <div>
+                                <h4 class="text-2xl font-bold text-gray-800">${food.name}</h4>
+                                <p class="text-amber-700 font-semibold">핵심 성분: ${food.compound}</p>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <p class="font-semibold text-gray-700">🧐 일반적인 주장:</p>
+                            <p class="text-gray-600 mb-2">${food.claim}</p>
+                            <p class="font-semibold text-gray-700">🔬 과학적 사실:</p>
+                            <p class="text-gray-600">${food.science}</p>
+                        </div>
+                    `;
+                } else {
+                    detailsContainer.innerHTML = `
+                        <div class="flex items-start space-x-4">
+                            <div class="text-5xl">${food.icon}</div>
+                            <div>
+                                <h4 class="text-2xl font-bold text-gray-800">${food.name}</h4>
+                                <p class="text-red-600 font-semibold">주의 대상: ${food.riskGroup}</p>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <p class="font-semibold text-gray-700">🤔 주의가 필요한 이유:</p>
+                            <p class="text-gray-600">${food.reason}</p>
+                        </div>
+                    `;
+                }
+            }
+            
+            foodData.recommended.forEach(food => recommendedGrid.appendChild(createFoodCard(food, 'recommended')));
+            foodData.caution.forEach(food => cautionGrid.appendChild(createFoodCard(food, 'caution')));
+            
+            tabRecommended.addEventListener('click', () => {
+                tabRecommended.className = 'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm active-nav';
+                tabCaution.className = 'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm inactive-nav';
+                contentRecommended.classList.remove('hidden');
+                contentCaution.classList.add('hidden');
+            });
+
+            tabCaution.addEventListener('click', () => {
+                tabCaution.className = 'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm active-nav';
+                tabRecommended.className = 'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm inactive-nav';
+                contentCaution.classList.remove('hidden');
+                contentRecommended.classList.add('hidden');
+            });
+            
+            const goalData = {
+                energy: {
+                    title: '⚡️ 지속적인 에너지와 인지 기능 집중',
+                    description: '안정적인 혈당 유지와 뇌 기능 활성화에 초점을 맞춘 조합입니다. 고품질 단백질과 건강한 지방이 핵심입니다.',
+                    meal: '<strong>추천 식단:</strong> 삶은 달걀 2개, 블루베리를 곁들인 그릭 요거트, 아보카도 반 개',
+                    foods: ['egg', 'blueberry', 'yogurt']
+                },
+                gut: {
+                    title: '🌿 최적의 장 건강과 규칙성',
+                    description: '장내 유익균의 먹이(프리바이오틱스)와 유익균 자체(프로바이오틱스)를 함께 공급하여 장내 생태계를 건강하게 만듭니다.',
+                    meal: '<strong>추천 식단:</strong> 오트밀 한 그릇에 사과 1/4쪽, 그릭 요거트 두 스푼, 치아씨드 한 스푼',
+                    foods: ['oatmeal', 'apple', 'yogurt']
+                },
+                stomach: {
+                    title: '😌 최대의 위 편안함과 진정',
+                    description: '위 점막을 보호하고 위산을 중화하는 성분이 풍부한 음식들로 구성하여 위를 부드럽게 감싸줍니다.',
+                    meal: '<strong>추천 식단:</strong> 살짝 찐 양배추와 찐 감자 몇 조각, 뒤이어 오트밀 한 그릇',
+                    foods: ['cabbage', 'potato', 'oatmeal']
+                }
+            };
+
+            goalFilters.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    const goal = e.target.dataset.goal;
+                    
+                    document.querySelectorAll('#goal-filters button').forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active');
+
+                    const data = goalData[goal];
+                    recommendationResult.innerHTML = `
+                        <h4 class="text-xl font-bold text-amber-700 mb-2">${data.title}</h4>
+                        <p class="text-gray-600 mb-4">${data.description}</p>
+                        <p class="text-gray-800 bg-amber-100 p-3 rounded-lg">${data.meal}</p>
+                    `;
+
+                    document.querySelectorAll('#recommended-foods-grid .card').forEach(card => {
+                        if (data.foods.includes(card.dataset.id)) {
+                            card.classList.add('highlight-food');
+                        } else {
+                            card.classList.remove('highlight-food');
+                        }
+                    });
+                }
+            });
+
+            const ctx = document.getElementById('foodRatingChart').getContext('2d');
+            const chartData = foodData.recommended.sort((a,b) => a.rating - b.rating);
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartData.map(f => f.name),
+                    datasets: [{
+                        label: '전문가 추천 점수',
+                        data: chartData.map(f => f.rating),
+                        backgroundColor: 'rgba(245, 158, 11, 0.6)',
+                        borderColor: 'rgba(217, 119, 6, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: '아침 공복 추천 음식 비교',
+                            font: { size: 18 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.x !== null) {
+                                        label += `${context.parsed.x}점`;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 5,
+                            title: {
+                                display: true,
+                                text: '추천 점수 (5점 만점)'
+                            }
+                        }
+                    }
+                }
+            });
+             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
