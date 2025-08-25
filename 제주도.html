@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우리가족 제주여행 플래너</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: A single-page, vertically scrolling application with a sticky header for navigation. The structure is chronological (Day 0, 1, 2, 3) to follow the itinerary's logic. This is more user-friendly than a static document as it allows quick navigation and focused views. Key interactions include a price comparison chart for data visualization and a clickable choice element for Day 3's optional activities, making the plan feel more dynamic and user-driven. -->
+    <!-- Visualization & Content Choices: 1. Aqua Planet Prices: Report data on online vs offline ticket costs. Goal: Inform user of savings. Viz: Bar Chart (Chart.js). Interaction: Tooltips. Justification: Visually impactful comparison. 2. Day 3 Options: Report text describing O'sulloc and Camellia Hill. Goal: Organize choices. Presentation: Interactive selection cards. Interaction: Click to reveal details. Justification: Reduces initial clutter and engages the user in planning. 3. Daily Schedule: Report's chronological plan. Goal: Organize daily flow. Presentation: Vertical Timeline (HTML/CSS). Justification: Intuitive for itineraries. NO SVG/Mermaid used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #FDFBF7;
+            color: #3a3a3a;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.75rem;
+            top: 0;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            background-color: #A3B18A;
+            border: 4px solid #FDFBF7;
+            z-index: 10;
+        }
+        .timeline-line {
+            position: absolute;
+            left: -2.125rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #e5e7eb;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+        }
+        .nav-link.active {
+            color: #D4A373;
+            font-weight: 700;
+            transform: scale(1.1);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 40vh;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold" style="color: #582F0E;">✈️ 우리가족 제주여행</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#arrival" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-[#D4A373]">도착 & 준비</a>
+                        <a href="#day1" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-[#D4A373]">1일차</a>
+                        <a href="#day2" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-[#D4A373]">2일차</a>
+                        <a href="#day3" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-[#D4A373]">3일차</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <section id="arrival" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold mb-2 text-center" style="color: #582F0E;">도착 및 필수 준비사항</h2>
+            <p class="text-center text-gray-600 mb-8">여행의 시작, 늦은 밤 도착도 문제 없도록 꼼꼼히 준비해요.</p>
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-md" role="alert">
+                <p class="font-bold">🚨 핵심 체크: 심야 렌터카 인수</p>
+                <p>제주공항 저녁 10시 05분 도착 시 대부분 렌터카 업체 영업이 종료됩니다. 예약한 업체에 항공편 정보를 전달하고 '야간 배차 서비스' 가능 여부, 추가 요금, 마감 시간을 반드시 사전에 확정해야 합니다. (보통 밤 10시 마감)</p>
+            </div>
+             <div class="mt-8 grid md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4" style="color: #A3B18A;">공항에서 숙소까지</h3>
+                    <ul class="space-y-3 text-gray-700">
+                        <li class="flex items-start"><span class="mr-2 mt-1">🏠</span><div><strong class="font-semibold">숙소 정보:</strong> 켄싱턴 리조트 서귀포점 (서귀포시 이어도로 684)</div></li>
+                        <li class="flex items-start"><span class="mr-2 mt-1">⏱️</span><div><strong class="font-semibold">예상 소요시간:</strong> 공항에서 약 45분 ~ 70분</div></li>
+                        <li class="flex items-start"><span class="mr-2 mt-1">🌙</span><div><strong class="font-semibold">첫날 밤 목표:</strong> 관광보다는 편의점 등에서 간단한 필요 물품 구매 후, 숙소로 바로 이동하여 휴식을 취하는 것이 최선입니다.</div></li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <img src="https://placehold.co/600x400/A3B18A/ffffff?text=Jeju+Night+Drive" alt="제주도 밤 드라이브" class="rounded-lg object-cover w-full h-full">
+                </div>
+            </div>
+        </section>
+
+        <section id="day1" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold mb-2 text-center" style="color: #582F0E;">1일차: 동쪽 바다와 말과 함께하는 탐험</h2>
+            <p class="text-center text-gray-600 mb-12">숙소에서 가장 먼 동쪽부터! 가장 긴 이동을 첫날에 소화해 남은 일정을 여유롭게 만듭니다.</p>
+            <div class="relative pl-10 md:pl-20">
+                <div class="timeline-line"></div>
+                <div class="timeline-item relative mb-12">
+                    <h3 class="text-xl font-bold mb-2" style="color: #A3B18A;">오전 9:00 - 성산으로 출발</h3>
+                    <p class="text-gray-600">숙소에서 아쿠아플라넷까지 약 1시간 30분 소요. 제주의 아름다운 해안 풍경을 감상하며 드라이브를 즐겨보세요.</p>
+                </div>
+                <div class="timeline-item relative mb-12">
+                    <h3 class="text-xl font-bold mb-2" style="color: #A3B18A;">오전 10:30 - 아쿠아플라넷 제주</h3>
+                    <div class="bg-white p-6 rounded-lg shadow-lg mt-4">
+                        <p class="mb-4">아이와 함께하는 가족 여행 최고의 선택! 온라인 사전 예매로 비용을 절약하고, 방문 전 홈페이지에서 공연 시간을 꼭 확인하세요.</p>
+                        <ul class="text-sm space-y-2 mb-6">
+                            <li><strong>📍 주소:</strong> 서귀포시 성산읍 섭지코지로 95</li>
+                            <li><strong>💰 꿀팁:</strong> 36개월 미만 유아는 증빙서류 지참 시 무료 입장!</li>
+                            <li><strong>🕒 추천 코스:</strong> 수족관 관람 → 점심 식사 → 오션 아레나 공연 관람 (약 2.5시간 소요)</li>
+                        </ul>
+                        <div class="chart-container">
+                            <canvas id="ticketPriceChart"></canvas>
+                        </div>
+                        <p class="text-center text-xs text-gray-500 mt-2">온라인 예매 시 입장료 비교</p>
+                    </div>
+                </div>
+                <div class="timeline-item relative mb-12">
+                    <h3 class="text-xl font-bold mb-2" style="color: #A3B18A;">오후 3:00 - 승마 체험</h3>
+                    <p class="text-gray-600">아쿠아플라넷 근처에서 성산일출봉을 배경으로 멋진 승마 체험을 즐겨보세요. '졸띠해변승마' 등 아이들이 안전하게 탈 수 있는 곳을 추천합니다. 말에게 당근 먹이주기 체험도 가능해요.</p>
+                </div>
+                <div class="timeline-item relative">
+                    <h3 class="text-xl font-bold mb-2" style="color: #A3B18A;">오후 5:30 - 저녁 식사 및 숙소 복귀</h3>
+                    <p class="text-gray-600">성산 지역의 가족 친화적인 식당('해왓', '등경돌식당' 등)에서 갈치구이로 든든한 저녁 식사 후, 약 1시간 30분 이동하여 숙소에서 편안한 휴식을 취합니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="day2" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold mb-2 text-center" style="color: #582F0E;">2일차: 남쪽 해안의 절경과 항해</h2>
+            <p class="text-center text-gray-600 mb-12">숙소가 있는 서귀포 중문 지역에 집중! 이동은 최소화, 휴식은 최대로 즐기는 날입니다.</p>
+            <div class="relative pl-10 md:pl-20">
+                <div class="timeline-line"></div>
+                <div class="timeline-item relative mb-12">
+                    <h3 class="text-xl font-bold mb-2" style="color: #A8DADC;">오전 10:00 - 중문 자연 탐방</h3>
+                    <p class="text-gray-600 mb-4">숙소 근처의 웅장한 자연을 만나보세요. 유모차 이동이 편리한 산책로부터 시작합니다.</p>
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div class="bg-white p-4 rounded-lg shadow"><strong>대포 주상절리대:</strong> 화산이 만든 육각기둥의 절경 (관람 30-40분)</div>
+                        <div class="bg-white p-4 rounded-lg shadow"><strong>천제연 폭포:</strong> 숲속 3단 폭포의 시원함 (관람 1시간)</div>
+                    </div>
+                </div>
+                <div class="timeline-item relative mb-12">
+                    <h3 class="text-xl font-bold mb-2" style="color: #A8DADC;">오후 3:00 - 퍼시픽 리솜 요트 투어</h3>
+                     <div class="bg-white p-6 rounded-lg shadow-lg mt-4">
+                        <p class="mb-4">여행의 하이라이트! 대포항에서 출발하는 요트를 타고 바다 위에서 주상절리대를 감상하는 특별한 경험을 해보세요. 사전 예약은 필수입니다.</p>
+                        <ul class="text-sm space-y-2">
+                           <li><strong>🕒 소요시간:</strong> 약 60분</li>
+                           <li><strong>✨ 특별한 경험:</strong> 육지에서 본 주상절리대를 바다에서 다시 보는 색다른 관점!</li>
+                           <li><strong>💰 꿀팁:</strong> 36개월 미만 유아는 무료 탑승 가능! (업체 확인 필요)</li>
+                           <li><strong>❗ 주의:</strong> 예약 시간 20분 전까지 도착하여 승선 신고서를 작성해야 합니다.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="timeline-item relative">
+                    <h3 class="text-xl font-bold mb-2" style="color: #A8DADC;">오후 6:00 - '웰컴 키즈존' 저녁 식사</h3>
+                    <p class="text-gray-600">'고집돌우럭 중문점'과 같이 아이들을 위한 무료 정식과 편의시설이 완비된 식당에서 어른도, 아이도 만족스러운 식사를 즐겨보세요. 우럭조림이 대표 메뉴입니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="day3" class="scroll-mt-20">
+            <h2 class="text-3xl font-bold mb-2 text-center" style="color: #582F0E;">3일차: 선택의 즐거움과 여유로운 출발</h2>
+            <p class="text-center text-gray-600 mb-12">저녁 8시 비행기라 여유로운 마지막 날! 공항 가는 길에 제주의 또 다른 매력을 느껴보세요.</p>
+            
+            <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+                <h3 class="text-xl font-bold mb-4 text-center">오전: 마지막 날을 위한 맞춤 선택</h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <button id="optionA" class="option-btn border-2 border-transparent p-4 rounded-lg text-left transition-all duration-300 hover:shadow-xl hover:scale-105">
+                        <h4 class="font-bold text-lg" style="color: #A3B18A;">🌿 선택 A: 오설록 티 뮤지엄</h4>
+                        <p class="text-sm text-gray-600">드넓은 녹차밭에서 인생샷! 아이들은 잔디밭에서 뛰어놀고, 어른들은 향긋한 녹차 디저트와 함께 여유를 즐겨요. (입장료 무료)</p>
+                    </button>
+                    <button id="optionB" class="option-btn border-2 border-transparent p-4 rounded-lg text-left transition-all duration-300 hover:shadow-xl hover:scale-105">
+                        <h4 class="font-bold text-lg" style="color: #D4A373;">🌺 선택 B: 카멜리아 힐</h4>
+                        <p class="text-sm text-gray-600">사계절 꽃이 가득한 수목원에서 예쁜 가족사진을 남겨보세요. 유모차 이동도 편리하게 잘 되어있어요. (입장료 유료)</p>
+                    </button>
+                </div>
+                <div id="option-details" class="mt-6 text-center text-gray-700">
+                    <p>가고 싶은 곳을 선택하여 일정을 확인해보세요!</p>
+                </div>
+            </div>
+
+            <div class="relative pl-10 md:pl-20">
+                <div class="timeline-line"></div>
+                <div class="timeline-item relative mb-12">
+                    <h3 class="text-xl font-bold mb-2" style="color: #582F0E;">오후 4:30 - 공항 근처 마지막 식사</h3>
+                    <p class="text-gray-600">'제주김만복'의 전복김밥이나 '올래국수'의 고기국수 등 제주에서의 마지막 맛있는 추억을 만드세요.</p>
+                </div>
+                <div class="timeline-item relative">
+                    <h3 class="text-xl font-bold mb-2" style="color: #582F0E;">오후 6:00 - 공항으로!</h3>
+                    <ul class="space-y-2 text-sm text-gray-700 list-decimal list-inside">
+                        <li><strong>~5:45 PM:</strong> 렌터카 반납 전 주유하기</li>
+                        <li><strong>~6:00 PM:</strong> 렌터카 사무실 도착 및 차량 반납</li>
+                        <li><strong>~6:20 PM:</strong> 셔틀버스로 공항 출발층으로 이동</li>
+                        <li><strong>~6:40 PM:</strong> 공항 도착 후 탑승 수속 시작</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('ticketPriceChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['성인 1인 기준'],
+                    datasets: [{
+                        label: '현장 구매',
+                        data: [43700],
+                        backgroundColor: 'rgba(212, 163, 115, 0.6)',
+                        borderColor: 'rgba(212, 163, 115, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: '온라인 예매',
+                        data: [27700],
+                        backgroundColor: 'rgba(163, 177, 138, 0.6)',
+                        borderColor: 'rgba(163, 177, 138, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '아쿠아플라넷 입장료 비교',
+                            font: { size: 16 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW' }).format(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value, index, values) {
+                                    return value.toLocaleString() + '원';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const optionA = document.getElementById('optionA');
+            const optionB = document.getElementById('optionB');
+            const detailsDiv = document.getElementById('option-details');
+            
+            function selectOption(option) {
+                if (option === 'A') {
+                    optionA.classList.add('border-green-500', 'shadow-lg');
+                    optionA.classList.remove('border-transparent');
+                    optionB.classList.remove('border-yellow-500', 'shadow-lg');
+                    optionB.classList.add('border-transparent');
+                    detailsDiv.innerHTML = `<p class="font-semibold text-lg" style="color: #A3B18A;">오설록 코스 선택!</p><p>향긋한 차와 함께 여유로운 시간을 보내고 공항으로 이동합니다.</p>`;
+                } else if (option === 'B') {
+                    optionB.classList.add('border-yellow-500', 'shadow-lg');
+                    optionB.classList.remove('border-transparent');
+                    optionA.classList.remove('border-green-500', 'shadow-lg');
+                    optionA.classList.add('border-transparent');
+                    detailsDiv.innerHTML = `<p class="font-semibold text-lg" style="color: #D4A373;">카멜리아 힐 코스 선택!</p><p>아름다운 꽃과 함께 마지막 추억을 남기고 공항으로 이동합니다.</p>`;
+                }
+            }
+
+            optionA.addEventListener('click', () => selectOption('A'));
+            optionB.addEventListener('click', () => selectOption('B'));
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 80) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
