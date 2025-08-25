@@ -102,9 +102,23 @@
         <section id="arrival" class="mb-16 scroll-mt-20">
             <h2 class="text-3xl font-bold mb-2 text-center" style="color: #582F0E;">도착 및 필수 준비사항</h2>
             <p class="text-center text-gray-600 mb-8">여행의 시작, 늦은 밤 도착도 문제 없도록 꼼꼼히 준비해요.</p>
-            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-md" role="alert">
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-md mb-8" role="alert">
                 <p class="font-bold">🚨 [매우 중요] 심야 렌터카 인수 계획</p>
                 <p><strong>저녁 10시 5분 공항 도착</strong>은 렌터카 인수에 큰 제약이 따릅니다. 대부분의 업체는 영업이 종료되었을 시간이며, '야간 배차 서비스'도 마감되었을 가능성이 매우 높습니다. <strong>여행 전, 렌터카 업체에 연락하여 이 시간에 인수 가능한지 '반드시' 확정해야 합니다.</strong> 불가능할 경우, 첫날은 택시(약 4~5만원)로 이동 후 다음 날 아침에 차를 인수하는 대안을 고려해야 합니다.</p>
+            </div>
+            <div class="bg-teal-50 border border-teal-200 p-4 rounded-lg shadow-md mb-8">
+                <h3 class="font-bold text-md mb-2 text-teal-800">🌦️ 실시간 제주 날씨 예보 (9/2 ~ 9/5)</h3>
+                <div id="weather-forecast" class="flex flex-col sm:flex-row justify-around items-center text-center p-2">
+                    <p id="weather-loading" class="text-gray-600">최신 날씨 정보를 불러오는 중입니다...</p>
+                </div>
+                 <div class="mt-4">
+                    <h4 class="font-semibold text-sm text-teal-800">👚 옷차림 추천</h4>
+                     <ul class="list-disc list-inside pl-2 mt-1 text-sm text-gray-700">
+                        <li>낮에는 반팔, 밤에는 얇은 긴팔 옷이나 가디건을 준비하세요.</li>
+                        <li>혹시 모를 비에 대비해 작은 우산이나 가벼운 방수 자켓을 챙기는 것이 좋습니다.</li>
+                        <li>자외선 차단제, 선글라스, 모자는 필수입니다.</li>
+                    </ul>
+                </div>
             </div>
              <div class="mt-8 grid md:grid-cols-2 gap-8 items-center">
                 <div>
@@ -255,6 +269,76 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const fetchWeather = () => {
+                const lat = 33.49; // Jeju City latitude
+                const lon = 126.53; // Jeju City longitude
+                const startDate = '2025-09-02';
+                const endDate = '2025-09-05';
+                const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=Asia%2FSeoul&start_date=${startDate}&end_date=${endDate}`;
+
+                const weatherContainer = document.getElementById('weather-forecast');
+                const loadingEl = document.getElementById('weather-loading');
+
+                fetch(apiUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (loadingEl) {
+                            loadingEl.style.display = 'none';
+                        }
+                        
+                        const daily = data.daily;
+                        let forecastHtml = '';
+
+                        daily.time.forEach((date, index) => {
+                            const day = new Date(date).getDate();
+                            const weatherCode = daily.weathercode[index];
+                            const maxTemp = Math.round(daily.temperature_2m_max[index]);
+                            const minTemp = Math.round(daily.temperature_2m_min[index]);
+                            const { icon, description } = getWeatherInfo(weatherCode);
+
+                            forecastHtml += `
+                                <div class="flex-1 p-2">
+                                    <p class="font-semibold">${day}일</p>
+                                    <p class="text-3xl my-1">${icon}</p>
+                                    <p class="text-sm">${description}</p>
+                                    <p class="text-sm font-medium">${minTemp}° / ${maxTemp}°</p>
+                                </div>
+                            `;
+                        });
+                        weatherContainer.innerHTML = forecastHtml;
+                    })
+                    .catch(error => {
+                        console.error('Error fetching weather:', error);
+                        if(loadingEl) {
+                           loadingEl.textContent = '날씨 정보를 불러오는데 실패했습니다.';
+                        }
+                    });
+            };
+
+            const getWeatherInfo = (code) => {
+                const weatherMap = {
+                    0: { icon: '☀️', description: '맑음' },
+                    1: { icon: '🌤️', description: '대체로 맑음' },
+                    2: { icon: '🌥️', description: '구름 조금' },
+                    3: { icon: '☁️', description: '흐림' },
+                    45: { icon: '🌫️', description: '안개' },
+                    48: { icon: '🌫️', description: '서리 안개' },
+                    51: { icon: '🌦️', description: '이슬비' },
+                    53: { icon: '🌦️', description: '이슬비' },
+                    55: { icon: '🌦️', description: '이슬비' },
+                    61: { icon: '🌧️', description: '비' },
+                    63: { icon: '🌧️', description: '비' },
+                    65: { icon: '🌧️', description: '폭우' },
+                    80: { icon: '🌦️', description: '소나기' },
+                    81: { icon: '🌦️', description: '소나기' },
+                    82: { icon: '⛈️', description: '폭우성 소나기' },
+                    95: { icon: '⛈️', description: '뇌우' },
+                };
+                return weatherMap[code] || { icon: '🤔', description: '정보 없음' };
+            };
+            
+            fetchWeather();
+
             const ctx = document.getElementById('ticketPriceChart').getContext('2d');
             new Chart(ctx, {
                 type: 'bar',
