@@ -108,8 +108,8 @@
             </div>
             <div class="bg-teal-50 border border-teal-200 p-4 rounded-lg shadow-md mb-8">
                 <h3 class="font-bold text-md mb-2 text-teal-800">🌦️ 실시간 제주 날씨 예보 (9/2 ~ 9/5)</h3>
-                <div id="weather-forecast" class="flex flex-col sm:flex-row justify-around items-center text-center p-2">
-                    <p id="weather-loading" class="text-gray-600">최신 날씨 정보를 불러오는 중입니다...</p>
+                <div id="weather-forecast" class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center p-2">
+                    <p id="weather-loading" class="text-gray-600 col-span-2 sm:col-span-4">최신 날씨 정보를 불러오는 중입니다...</p>
                 </div>
                  <div class="mt-4">
                     <h4 class="font-semibold text-sm text-teal-800">👚 옷차림 추천</h4>
@@ -297,7 +297,7 @@
                             const { icon, description } = getWeatherInfo(weatherCode);
 
                             forecastHtml += `
-                                <div class="flex-1 p-2">
+                                <div class="p-2">
                                     <p class="font-semibold">${day}일</p>
                                     <p class="text-3xl my-1">${icon}</p>
                                     <p class="text-sm">${description}</p>
