@@ -74,8 +74,27 @@
                         <a href="#day3" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-[#D4A373]">3일차</a>
                     </div>
                 </div>
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-[#D4A373] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#D4A373]">
+                        <span class="sr-only">Open main menu</span>
+                        <svg id="menu-open-icon" class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                        <svg id="menu-close-icon" class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
             </div>
         </nav>
+        <div class="md:hidden hidden" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#arrival" class="mobile-nav-link text-gray-700 hover:bg-gray-50 hover:text-[#D4A373] block px-3 py-2 rounded-md text-base font-medium">도착 & 준비</a>
+                <a href="#day1" class="mobile-nav-link text-gray-700 hover:bg-gray-50 hover:text-[#D4A373] block px-3 py-2 rounded-md text-base font-medium">1일차</a>
+                <a href="#day2" class="mobile-nav-link text-gray-700 hover:bg-gray-50 hover:text-[#D4A373] block px-3 py-2 rounded-md text-base font-medium">2일차</a>
+                <a href="#day3" class="mobile-nav-link text-gray-700 hover:bg-gray-50 hover:text-[#D4A373] block px-3 py-2 rounded-md text-base font-medium">3일차</a>
+            </div>
+        </div>
     </header>
 
     <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -85,12 +104,13 @@
             <p class="text-center text-gray-600 mb-8">여행의 시작, 늦은 밤 도착도 문제 없도록 꼼꼼히 준비해요.</p>
             <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-md" role="alert">
                 <p class="font-bold">🚨 핵심 체크: 심야 렌터카 인수</p>
-                <p>제주공항 저녁 10시 05분 도착 시 대부분 렌터카 업체 영업이 종료됩니다. 예약한 업체에 항공편 정보를 전달하고 '야간 배차 서비스' 가능 여부, 추가 요금, 마감 시간을 반드시 사전에 확정해야 합니다. (보통 밤 10시 마감)</p>
+                <p>제주공항 저녁 8시 50분 도착 시 대부분 렌터카 업체 영업이 종료됩니다. 예약한 업체에 항공편 정보를 전달하고 '야간 배차 서비스' 가능 여부, 추가 요금, 마감 시간을 반드시 사전에 확정해야 합니다. (보통 밤 10시 마감)</p>
             </div>
              <div class="mt-8 grid md:grid-cols-2 gap-8 items-center">
                 <div>
                     <h3 class="text-2xl font-semibold mb-4" style="color: #A3B18A;">공항에서 숙소까지</h3>
                     <ul class="space-y-3 text-gray-700">
+                        <li class="flex items-start"><span class="mr-2 mt-1">🚗</span><div><strong class="font-semibold">렌터카 셔틀:</strong> 1층 5번 게이트 앞 횡단보도 건너편 승차장에서 탑승.</div></li>
                         <li class="flex items-start"><span class="mr-2 mt-1">🏠</span><div><strong class="font-semibold">숙소 정보:</strong> 켄싱턴 리조트 서귀포점 (서귀포시 이어도로 684)</div></li>
                         <li class="flex items-start"><span class="mr-2 mt-1">⏱️</span><div><strong class="font-semibold">예상 소요시간:</strong> 공항에서 약 45분 ~ 70분</div></li>
                         <li class="flex items-start"><span class="mr-2 mt-1">🌙</span><div><strong class="font-semibold">첫날 밤 목표:</strong> 관광보다는 편의점 등에서 간단한 필요 물품 구매 후, 숙소로 바로 이동하여 휴식을 취하는 것이 최선입니다.</div></li>
@@ -138,20 +158,39 @@
         </section>
 
         <section id="day2" class="mb-16 scroll-mt-20">
-            <h2 class="text-3xl font-bold mb-2 text-center" style="color: #582F0E;">2일차: 남쪽 해안의 절경과 항해</h2>
-            <p class="text-center text-gray-600 mb-12">숙소가 있는 서귀포 중문 지역에 집중! 이동은 최소화, 휴식은 최대로 즐기는 날입니다.</p>
+            <h2 class="text-3xl font-bold mb-2 text-center" style="color: #582F0E;">2일차: 온전한 휴식, 리조트에서 즐기는 물놀이</h2>
+            <p class="text-center text-gray-600 mb-12">빡빡한 일정은 잠시 안녕! 오늘은 리조트에서 아이들과 함께 여유를 만끽하는 날입니다.</p>
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <img src="https://placehold.co/600x400/A8DADC/ffffff?text=Resort+Pool+Fun" alt="리조트 수영장" class="rounded-lg object-cover w-full h-full">
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4" style="color: #A8DADC;">켄싱턴 리조트 수영장 즐기기</h3>
+                    <ul class="space-y-3 text-gray-700">
+                        <li class="flex items-start"><span class="mr-2 mt-1">⏰</span><div><strong class="font-semibold">오전:</strong> 늦잠 후, 리조트에서 여유롭게 아침 식사를 즐기세요.</div></li>
+                        <li class="flex items-start"><span class="mr-2 mt-1">🏊</span><div><strong class="font-semibold">오후:</strong> 리조트 내 수영장에서 아이들과 함께 신나는 물놀이 시간을 보내세요. 1살, 6살 아이 모두 즐길 수 있는 유아풀이 있는지 미리 확인하면 좋습니다.</div></li>
+                        <li class="flex items-start"><span class="mr-2 mt-1">😴</span><div><strong class="font-semibold">낮잠 시간:</strong> 물놀이 후에는 아이들을 위해 충분한 낮잠 시간을 가져 체력을 보충해 주세요.</div></li>
+                        <li class="flex items-start"><span class="mr-2 mt-1">🍽️</span><div><strong class="font-semibold">저녁:</strong> 리조트 근처의 가까운 식당에서 편안하게 저녁 식사를 하거나, 리조트 내 다이닝을 이용하는 것도 좋은 방법입니다.</div></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        
+        <section id="day3" class="scroll-mt-20">
+            <h2 class="text-3xl font-bold mb-2 text-center" style="color: #582F0E;">3일차: 남쪽 해안의 절경과 여유로운 출발</h2>
+            <p class="text-center text-gray-600 mb-12">체력 충전 완료! 마지막 날은 서귀포의 아름다운 자연을 만끽하고 공항으로 이동합니다.</p>
             <div class="relative pl-10 md:pl-20">
                 <div class="timeline-line"></div>
                 <div class="timeline-item relative mb-12">
-                    <h3 class="text-xl font-bold mb-2" style="color: #A8DADC;">오전 10:00 - 중문 자연 탐방</h3>
-                    <p class="text-gray-600 mb-4">숙소 근처의 웅장한 자연을 만나보세요. 유모차 이동이 편리한 산책로부터 시작합니다.</p>
+                    <h3 class="text-xl font-bold mb-2" style="color: #D4A373;">오전 10:00 - 중문 자연 탐방</h3>
+                    <p class="text-gray-600 mb-4">리조트 근처의 웅장한 자연을 만나보세요. 유모차 이동이 편리한 산책로부터 시작합니다.</p>
                     <div class="grid sm:grid-cols-2 gap-4">
                         <div class="bg-white p-4 rounded-lg shadow"><strong>대포 주상절리대:</strong> 화산이 만든 육각기둥의 절경 (관람 30-40분)</div>
                         <div class="bg-white p-4 rounded-lg shadow"><strong>천제연 폭포:</strong> 숲속 3단 폭포의 시원함 (관람 1시간)</div>
                     </div>
                 </div>
                 <div class="timeline-item relative mb-12">
-                    <h3 class="text-xl font-bold mb-2" style="color: #A8DADC;">오후 3:00 - 퍼시픽 리솜 요트 투어</h3>
+                    <h3 class="text-xl font-bold mb-2" style="color: #D4A373;">오후 2:00 - 퍼시픽 리솜 요트 투어</h3>
                      <div class="bg-white p-6 rounded-lg shadow-lg mt-4">
                         <p class="mb-4">여행의 하이라이트! 대포항에서 출발하는 요트를 타고 바다 위에서 주상절리대를 감상하는 특별한 경험을 해보세요. 사전 예약은 필수입니다.</p>
                         <ul class="text-sm space-y-2">
@@ -162,36 +201,6 @@
                         </ul>
                     </div>
                 </div>
-                <div class="timeline-item relative">
-                    <h3 class="text-xl font-bold mb-2" style="color: #A8DADC;">오후 6:00 - '웰컴 키즈존' 저녁 식사</h3>
-                    <p class="text-gray-600">'고집돌우럭 중문점'과 같이 아이들을 위한 무료 정식과 편의시설이 완비된 식당에서 어른도, 아이도 만족스러운 식사를 즐겨보세요. 우럭조림이 대표 메뉴입니다.</p>
-                </div>
-            </div>
-        </section>
-
-        <section id="day3" class="scroll-mt-20">
-            <h2 class="text-3xl font-bold mb-2 text-center" style="color: #582F0E;">3일차: 선택의 즐거움과 여유로운 출발</h2>
-            <p class="text-center text-gray-600 mb-12">저녁 8시 비행기라 여유로운 마지막 날! 공항 가는 길에 제주의 또 다른 매력을 느껴보세요.</p>
-            
-            <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
-                <h3 class="text-xl font-bold mb-4 text-center">오전: 마지막 날을 위한 맞춤 선택</h3>
-                <div class="grid md:grid-cols-2 gap-6">
-                    <button id="optionA" class="option-btn border-2 border-transparent p-4 rounded-lg text-left transition-all duration-300 hover:shadow-xl hover:scale-105">
-                        <h4 class="font-bold text-lg" style="color: #A3B18A;">🌿 선택 A: 오설록 티 뮤지엄</h4>
-                        <p class="text-sm text-gray-600">드넓은 녹차밭에서 인생샷! 아이들은 잔디밭에서 뛰어놀고, 어른들은 향긋한 녹차 디저트와 함께 여유를 즐겨요. (입장료 무료)</p>
-                    </button>
-                    <button id="optionB" class="option-btn border-2 border-transparent p-4 rounded-lg text-left transition-all duration-300 hover:shadow-xl hover:scale-105">
-                        <h4 class="font-bold text-lg" style="color: #D4A373;">🌺 선택 B: 카멜리아 힐</h4>
-                        <p class="text-sm text-gray-600">사계절 꽃이 가득한 수목원에서 예쁜 가족사진을 남겨보세요. 유모차 이동도 편리하게 잘 되어있어요. (입장료 유료)</p>
-                    </button>
-                </div>
-                <div id="option-details" class="mt-6 text-center text-gray-700">
-                    <p>가고 싶은 곳을 선택하여 일정을 확인해보세요!</p>
-                </div>
-            </div>
-
-            <div class="relative pl-10 md:pl-20">
-                <div class="timeline-line"></div>
                 <div class="timeline-item relative mb-12">
                     <h3 class="text-xl font-bold mb-2" style="color: #582F0E;">오후 4:30 - 공항 근처 마지막 식사</h3>
                     <p class="text-gray-600">'제주김만복'의 전복김밥이나 '올래국수'의 고기국수 등 제주에서의 마지막 맛있는 추억을 만드세요.</p>
@@ -268,29 +277,6 @@
                 }
             });
 
-            const optionA = document.getElementById('optionA');
-            const optionB = document.getElementById('optionB');
-            const detailsDiv = document.getElementById('option-details');
-            
-            function selectOption(option) {
-                if (option === 'A') {
-                    optionA.classList.add('border-green-500', 'shadow-lg');
-                    optionA.classList.remove('border-transparent');
-                    optionB.classList.remove('border-yellow-500', 'shadow-lg');
-                    optionB.classList.add('border-transparent');
-                    detailsDiv.innerHTML = `<p class="font-semibold text-lg" style="color: #A3B18A;">오설록 코스 선택!</p><p>향긋한 차와 함께 여유로운 시간을 보내고 공항으로 이동합니다.</p>`;
-                } else if (option === 'B') {
-                    optionB.classList.add('border-yellow-500', 'shadow-lg');
-                    optionB.classList.remove('border-transparent');
-                    optionA.classList.remove('border-green-500', 'shadow-lg');
-                    optionA.classList.add('border-transparent');
-                    detailsDiv.innerHTML = `<p class="font-semibold text-lg" style="color: #D4A373;">카멜리아 힐 코스 선택!</p><p>아름다운 꽃과 함께 마지막 추억을 남기고 공항으로 이동합니다.</p>`;
-                }
-            }
-
-            optionA.addEventListener('click', () => selectOption('A'));
-            optionB.addEventListener('click', () => selectOption('B'));
-
             const navLinks = document.querySelectorAll('.nav-link');
             const sections = document.querySelectorAll('section');
 
@@ -311,12 +297,32 @@
                 });
             });
 
-            navLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
                     e.preventDefault();
                     document.querySelector(this.getAttribute('href')).scrollIntoView({
                         behavior: 'smooth'
                     });
+                });
+            });
+
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuOpenIcon = document.getElementById('menu-open-icon');
+            const menuCloseIcon = document.getElementById('menu-close-icon');
+            const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+                menuOpenIcon.classList.toggle('hidden');
+                menuCloseIcon.classList.toggle('hidden');
+            });
+
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                    menuOpenIcon.classList.remove('hidden');
+                    menuCloseIcon.classList.add('hidden');
                 });
             });
         });
