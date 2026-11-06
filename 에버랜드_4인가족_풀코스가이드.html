@@ -321,4 +321,804 @@
 
     .task-item.done {
       opacity: 0.52;
-      background:
+      background: rgba(128, 128, 128, 0.04);
+    }
+
+    .chk-box {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 2px solid var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+      font-size: 13px;
+      font-weight: 900;
+      color: transparent;
+      background: var(--card);
+    }
+
+    .task-item.done .chk-box {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #ffffff;
+    }
+
+    .task-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .task-meta {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 3px;
+    }
+
+    .time-badge {
+      font-size: 11px;
+      font-weight: 900;
+      padding: 1px 6px;
+      border-radius: 5px;
+      background: #1e293b;
+      color: #ffffff;
+    }
+
+    body.dark-mode .time-badge {
+      background: #fde047;
+      color: #0f172a;
+    }
+
+    .tag-badge {
+      font-size: 10.5px;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 5px;
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .task-title {
+      font-size: clamp(13px, 4vw, 14.5px);
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.32;
+    }
+
+    .task-item.done .task-title {
+      text-decoration: line-through;
+    }
+
+    .task-desc {
+      font-size: clamp(11.5px, 3.5vw, 12.5px);
+      color: var(--sub);
+      margin-top: 3px;
+      line-height: 1.38;
+    }
+
+    .info-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 11px 10px;
+      margin-bottom: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .info-card h3 {
+      font-size: clamp(13.5px, 4.1vw, 15px);
+      font-weight: 900;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .info-card p, .info-card li {
+      font-size: clamp(11.5px, 3.6vw, 12.8px);
+      color: var(--sub);
+      line-height: 1.42;
+    }
+
+    .badge-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      margin-bottom: 5px;
+      flex-wrap: wrap;
+    }
+
+    .zone-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .height-pill {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: rgba(128, 128, 128, 0.12);
+      color: var(--text);
+      margin: 3px 0 5px 0;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 45;
+      max-width: 520px;
+      margin: 0 auto;
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 4px 4px calc(4px + env(safe-area-inset-bottom, 0px));
+      box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.06);
+    }
+
+    .nav-tab {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      padding: 5px 2px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      font-family: inherit;
+    }
+
+    .nav-tab .nav-ico {
+      font-size: 16px;
+      line-height: 1;
+      margin-bottom: 2px;
+    }
+
+    .nav-tab .nav-txt {
+      font-size: clamp(10px, 3.2vw, 11.5px);
+      font-weight: 800;
+      white-space: nowrap;
+      letter-spacing: -0.04em;
+    }
+
+    .nav-tab.active {
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .nav-badge {
+      position: absolute;
+      top: 2px;
+      right: 6px;
+      background: var(--rose);
+      color: #ffffff;
+      font-size: 9px;
+      font-weight: 900;
+      padding: 0px 4px;
+      border-radius: 99px;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      background: rgba(0, 0, 0, 0.65);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal-box {
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      max-width: 340px;
+      width: 100%;
+      padding: 16px 14px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-box h3 {
+      font-size: 15px;
+      font-weight: 900;
+      margin-bottom: 6px;
+    }
+
+    .modal-box p, .modal-box li {
+      font-size: 12px;
+      color: var(--sub);
+      line-height: 1.45;
+    }
+
+    .modal-steps {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin: 10px 0;
+      list-style: decimal;
+      padding-left: 24px;
+    }
+
+    .modal-steps li {
+      margin-bottom: 5px;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    .btn-full {
+      flex: 1;
+      padding: 10px 8px;
+      border-radius: 10px;
+      font-size: 12.5px;
+      font-weight: 800;
+      border: none;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .btn-secondary {
+      background: var(--border);
+      color: var(--text);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-wrap">
+    <!-- 초슬림 상단 고정 헤더 -->
+    <header class="sticky-header">
+      <div class="header-top">
+        <div class="title-area">
+          <span class="title-badge">11월 풀코스 10:00~21:00</span>
+          <h1 class="app-title">🎡 에버랜드 4인가족 스케줄</h1>
+        </div>
+        <div class="header-actions">
+          <button type="button" class="icon-btn highlight" onclick="openShareModal()" title="파일 저장 및 공유">
+            📥 <span>파일저장·공유</span>
+          </button>
+          <button type="button" class="icon-btn" onclick="toggleDarkMode()" id="darkBtn" title="야간/주간 화면 전환">
+            🌙
+          </button>
+          <button type="button" class="icon-btn" onclick="openResetModal()" title="체크 초기화">
+            🔄
+          </button>
+        </div>
+      </div>
+
+      <div class="progress-row">
+        <div class="progress-track">
+          <div id="progressBar" class="progress-fill" style="width: 0%;"></div>
+        </div>
+        <span id="progressText" class="progress-label">0/19 (0%)</span>
+      </div>
+    </header>
+
+    <!-- 메인 콘텐츠 -->
+    <main class="main-content">
+
+      <!-- 요약 배너 -->
+      <div class="summary-strip">
+        <div>
+          <span class="summary-pill">티켓 3매</span>
+          <strong style="margin-left:3px;">성인2 + 7살(120cm↓)</strong>
+        </div>
+        <div style="color:var(--green); font-weight:800;">
+          ✔ 23개월 무료(증빙사진)
+        </div>
+      </div>
+
+      <!-- TAB 1: 시간표 -->
+      <section id="tab-timeline" class="">
+        <div class="control-bar">
+          <button type="button" id="filter-all" class="seg-btn active" onclick="setTimelineFilter('all')">전체 일정 (19)</button>
+          <button type="button" id="filter-rem" class="seg-btn" onclick="setTimelineFilter('remaining')">남은 일정만</button>
+          <button type="button" id="fold-all-btn" class="seg-btn" style="flex:0.65;" onclick="toggleAllCategories()">구간접기</button>
+        </div>
+
+        <div class="quick-jump">
+          <button type="button" class="jump-chip" onclick="jumpToCat(0)">0.입장전</button>
+          <button type="button" class="jump-chip" onclick="jumpToCat(1)">1.오전동물원</button>
+          <button type="button" class="jump-chip" onclick="jumpToCat(2)">2.점심/리프트</button>
+          <button type="button" class="jump-chip" onclick="jumpToCat(3)">3.매직랜드</button>
+          <button type="button" class="jump-chip" onclick="jumpToCat(4)">4.가든/기차</button>
+          <button type="button" class="jump-chip" onclick="jumpToCat(5)">5.저녁/방한</button>
+          <button type="button" class="jump-chip" onclick="jumpToCat(6)">6.야간불꽃</button>
+        </div>
+
+        <div id="timelineContainer"></div>
+      </section>
+
+      <!-- TAB 2: 키별 탑승 가이드 -->
+      <section id="tab-attractions" class="hidden">
+        <div class="quick-jump" style="margin-bottom:8px;">
+          <button type="button" id="attr-all" class="jump-chip" style="font-weight:900; border-color:var(--primary); color:var(--primary);" onclick="filterAttractions('all')">전체보기</button>
+          <button type="button" id="attr-family" class="jump-chip" onclick="filterAttractions('family')">👨‍👩‍👧‍👦 4인가족 무료</button>
+          <button type="button" id="attr-first" class="jump-chip" onclick="filterAttractions('first')">👦 7살 첫째 추천</button>
+          <button type="button" id="attr-second" class="jump-chip" onclick="filterAttractions('second')">👶 23개월(6천원)</button>
+        </div>
+
+        <div class="info-card" style="background:var(--primary-light); border-color:var(--primary-border);">
+          <h3 style="color:var(--primary);">💡 23개월 둘째 이용권 핵심 요약</h3>
+          <p>• <b>페스티벌 트레인(기차), 회전목마, 사파리, 로스트밸리, 판다월드, 곤돌라/리프트</b>는 23개월 아기도 <b>무료</b>로 함께 탑승합니다.</p>
+          <p style="margin-top:4px;">• 매직랜드의 <b>붕붕카·자동차왕국·로보트카 3종만</b> 아기가 탈 때 <b>유아 이용권(6,000원)</b>을 현장 키오스크에서 구매하세요.</p>
+        </div>
+
+        <div id="attractionsContainer"></div>
+      </section>
+
+      <!-- TAB 3: 동선·수유실·꿀팁 -->
+      <section id="tab-tips" class="hidden">
+        <div class="info-card" style="border-left: 4px solid var(--green);">
+          <h3>🚡 오르막길 절대 안 걷는 공식</h3>
+          <p style="margin-top:4px;"><b>① 낮 13:10 [스카이웨이 리프트]</b><br>주토피아(로스트밸리 옆) ➔ 매직랜드 올라갈 때 탑승. 유모차는 접어서 싣고 올라갑니다.</p>
+          <p style="margin-top:6px;"><b>② 밤 20:50 [스카이 크루즈 곤돌라]</b><br>포시즌스 가든 ➔ 정문 올라갈 때 탑승. <b>유모차/웨건을 접지 않고 그대로</b> 태워 가장 편하게 정문으로 탈출합니다.</p>
+        </div>
+
+        <div class="info-card" style="border-left: 4px solid var(--purple);">
+          <h3>🎆 11월 야간 풀코스 생존 3대 법칙</h3>
+          <p style="margin-top:4px;"><b>1. 17:30~19:00 '마의 구간' 실내 대피</b><br>해가 지는 5시 반부터 퍼레이드 전까지 가장 춥습니다. <b>차이나문·쿠치나마리오·가든테라스</b> 등 따뜻한 실내 식당에서 저녁을 먹으며 체온을 채우세요.</p>
+          <p style="margin-top:6px;"><b>2. 회전목마는 '밤 19:00'에 탑승</b><br>조명이 켜진 밤에 타야 인생샷이 나옵니다. 회전목마 바로 앞 길목이 <b>19:30 문라이트 퍼레이드 1열 명당</b>입니다.</p>
+          <p style="margin-top:6px;"><b>3. 불꽃놀이는 '곤돌라 입구'에서 보고 피날레 탈출</b><br>가든 깊숙이 들어가면 끝난 뒤 40분 이상 갇힙니다. <b>스카이 크루즈(곤돌라) 탑승장 입구 근처</b>에서 보다가 피날레 불꽃이 터질 때 한발 먼저 곤돌라를 타세요.</p>
+        </div>
+
+        <div class="info-card" style="border-left: 4px solid var(--rose);">
+          <h3>🍼 유아휴게실 (베이비케어) 명당 3곳</h3>
+          <p style="margin-top:4px;"><b>① 이솝빌리지 입구 (점심/낮 최고)</b><br>매직랜드 옆. 점심 직후 이유식/유아식 전자레인지 데우고 기저귀 갈기 가장 쾌적합니다.</p>
+          <p style="margin-top:6px;"><b>② 포시즌스 가든 풍차 옆 (저녁 18:30 추천)</b><br>야간 퍼레이드 전 따뜻한 물 보충하고 아이들 내복·패딩·핫팩 완전 무장하기 최적입니다.</p>
+          <p style="margin-top:6px;"><b>③ 정문 글로벌페어 (입·퇴장 시)</b><br>정문 통과 후 우측 유모차 대여소 인근. 가장 크고 깔끔합니다.</p>
+        </div>
+
+        <div class="info-card" style="border-left: 4px solid var(--accent);">
+          <h3>🍽️ 아이 동반 추천 실내 식당</h3>
+          <p style="margin-top:4px;">• <b>타운즈 마켓 (매직랜드/점심):</b> 돈가스, 유부우동 등 7살·23개월 모두 잘 먹는 메뉴</p>
+          <p style="margin-top:4px;">• <b>한가람 (아메리칸/점심·저녁):</b> 설렁탕, 미역국 반상 등 23개월 아기 밥 말아주기 최고</p>
+          <p style="margin-top:4px;">• <b>차이나문 / 쿠치나마리오 (가든 옆/저녁):</b> 짜장면·탕수육 또는 피자·파스타 먹고 바로 야간 가든 이동</p>
+        </div>
+      </section>
+
+      <!-- TAB 4: 준비물 체크 -->
+      <section id="tab-packing" class="hidden">
+        <div class="info-card" style="background:var(--primary-light); border-color:var(--primary-border);">
+          <h3 style="color:var(--primary);">🎒 11월 야간 풀코스 필수 준비물</h3>
+          <p>산속 에버랜드는 오후 4시 반 이후 기온이 급강하합니다. 출발 전 터치해서 하나씩 챙겨보세요.</p>
+        </div>
+        <div id="packingContainer" class="cat-block"></div>
+      </section>
+
+    </main>
+
+    <!-- 하단 고정 내비게이션 -->
+    <nav class="bottom-nav">
+      <button type="button" id="nav-timeline" class="nav-tab active" onclick="switchTab('timeline')">
+        <span class="nav-ico">⏰</span>
+        <span class="nav-txt">시간표</span>
+      </button>
+      <button type="button" id="nav-attractions" class="nav-tab" onclick="switchTab('attractions')">
+        <span class="nav-ico">🎠</span>
+        <span class="nav-txt">키별기구</span>
+      </button>
+      <button type="button" id="nav-tips" class="nav-tab" onclick="switchTab('tips')">
+        <span class="nav-ico">🍼</span>
+        <span class="nav-txt">동선·꿀팁</span>
+      </button>
+      <button type="button" id="nav-packing" class="nav-tab" onclick="switchTab('packing')">
+        <span class="nav-ico">🎒</span>
+        <span class="nav-txt">준비물</span>
+        <span id="packingBadge" class="nav-badge" style="background: var(--rose);">0/8</span>
+      </button>
+    </nav>
+
+    <!-- 파일저장 및 공유 모달 (버튼을 누를 때만 뜸) -->
+    <div id="shareModal" class="modal-backdrop">
+      <div class="modal-box">
+        <h3>📲 제미나이 없이 바로 여는 방법</h3>
+        <p>이 페이지는 <b>외부 서버나 제미나이 계정이 전혀 필요 없는 단일 파일</b>로 제작되었습니다.</p>
+        <ol class="modal-steps">
+          <li>아래 <b>[독립 웹파일(.html) 다운로드]</b> 버튼을 누릅니다.</li>
+          <li>저장된 파일을 <b>카카오톡(나와의 채팅 또는 가족 단톡방)</b>으로 전송합니다.</li>
+          <li>배우자/가족이 카톡에서 파일을 눌러 <b>삼성 인터넷·크롬·사파리</b>로 열면 똑같이 체크하며 쓸 수 있습니다!</li>
+        </ol>
+        <div class="btn-row">
+          <button type="button" class="btn-full btn-primary" onclick="downloadStandaloneHTML()">📥 독립 웹파일(.html) 다운로드</button>
+        </div>
+        <div class="btn-row" style="margin-top:6px;">
+          <button type="button" class="btn-full btn-secondary" onclick="copyScheduleText()">📋 텍스트 요약 복사</button>
+          <button type="button" class="btn-full btn-secondary" onclick="closeShareModal()">닫기</button>
+        </div>
+        <p id="copyFeedback" style="text-align:center; color:var(--green); font-weight:800; margin-top:6px; display:none;">✔ 클립보드에 일정 요약이 복사되었습니다!</p>
+      </div>
+    </div>
+
+    <!-- 초기화 확인 모달 -->
+    <div id="resetModal" class="modal-backdrop">
+      <div class="modal-box" style="text-align:center;">
+        <h3>🔄 체크 내역을 초기화할까요?</h3>
+        <p style="margin-top:4px;">시간표와 준비물 완료 상태가 모두 처음으로 돌아갑니다.</p>
+        <div class="btn-row">
+          <button type="button" class="btn-full btn-secondary" onclick="closeResetModal()">취소</button>
+          <button type="button" class="btn-full btn-primary" style="background:var(--rose);" onclick="confirmReset()">초기화</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const timelineData = [
+      {
+        category: "0. 입장 전 세팅 (방한·티켓)",
+        items: [
+          { id: "t1", time: "출발전", tag: "필수", title: "에버랜드 앱에 티켓 3매(성인2+소인1) 묶기", desc: "23개월 둘째는 앱 등록 X! 게이트 제시용 등본/가족관계증명서 사진 준비" },
+          { id: "t2", time: "입장직후", tag: "7살첫째", title: "7살 첫째 신장 밴드(팔찌) 착용하기", desc: "손님상담실 또는 첫 기구 앞에서 키 측정 후 팔찌 착용 (100/110cm 확인)" },
+          { id: "t3", time: "유모차", tag: "11월방한", title: "야간 방한용품 및 보조배터리 점검", desc: "유모차 방풍커버, 무릎담요 2개, 핫팩, 패딩·모자, 보조배터리 챙기기" }
+        ]
+      },
+      {
+        category: "1. 오전 (10:00~12:00) 주토피아 동물원",
+        items: [
+          { id: "t4", time: "10:00", tag: "스마트줄서기", title: "게이트 통과 즉시 1순위 스마트줄서기", desc: "로스트밸리 또는 사파리월드 중 1택 ('36개월 미만 유아 동반' 체크)" },
+          { id: "t5", time: "10:20", tag: "온가족", title: "대기 시간 동안 주변 동물원 산책", desc: "타이거밸리, 펭귄 아일랜드, 물범 등 유모차로 가볍게 관람" },
+          { id: "t6", time: "11:00", tag: "핵심팁", title: "첫 동물원 입장 직후 2순위 스마트줄서기", desc: "입장 QR 찍히자마자 판다월드 또는 남은 사파리/로스트밸리 바로 신청!" }
+        ]
+      },
+      {
+        category: "2. 점심 & 리프트 이동 (12:00~13:30)",
+        items: [
+          { id: "t7", time: "12:00", tag: "식사/수유", title: "실내 점심 식사 및 유아휴게실 들르기", desc: "추천: 타운즈마켓(돈가스/우동)·한가람(한식) / 이솝빌리지 유아휴게실" },
+          { id: "t8", time: "13:10", tag: "체력세이브", title: "스카이웨이(리프트) 타고 매직랜드 이동", desc: "로스트밸리 옆 탑승장! 오르막 걷지 말고 유모차 접어서 리프트 탑승" }
+        ]
+      },
+      {
+        category: "3. 오후 1부 (13:30~15:30) 매직랜드·이솝",
+        items: [
+          { id: "t9", time: "13:30", tag: "함께탑승", title: "두 아이 함께 타는 매직랜드 기구", desc: "플라잉 레스큐, 코끼리열차, 스푸키 펀 하우스, 볼하우스 가족 탑승" },
+          { id: "t10", time: "14:15", tag: "23개월선택", title: "23개월 둘째 유아전용 자동차 탑승", desc: "붕붕카·자동차왕국·로보트카는 둘째가 타겠다고 할 때만 현장 키오스크 6천원권 구매" },
+          { id: "t11", time: "14:45", tag: "1:1분담", title: "부모 분담 (7살 스릴기구 vs 23개월 낮잠)", desc: "첫째: 비룡열차(110↑)·슈팅고스트(110↑)·레이싱코스터(100↑) / 둘째: 밤 위해 유모차 낮잠" }
+        ]
+      },
+      {
+        category: "4. 오후 2부 (15:30~17:30) 가든 & 낮 퍼레이드",
+        items: [
+          { id: "t12", time: "15:30", tag: "4인무료", title: "포시즌스 가든 산책 & 페스티벌 트레인", desc: "4인 가족 모두 무료! 유모차는 기차역 입구에 주차 후 아기 안고 탑승" },
+          { id: "t13", time: "16:30", tag: "퍼레이드", title: "오후 낮 카니발 판타지 퍼레이드 관람", desc: "앱에서 당일 시작 시간 확인 후 퍼레이드 길목 연석에서 관람" }
+        ]
+      },
+      {
+        category: "5. 저녁 식사 & 실내 워밍업 (17:30~19:00)",
+        items: [
+          { id: "t14", time: "17:30", tag: "실내대피", title: "따뜻한 실내 식당에서 이른 저녁 식사", desc: "급격히 추워지는 시간! 가든 옆 차이나문(짜장/탕수육)·쿠치나마리오(피자) 추천" },
+          { id: "t15", time: "18:30", tag: "방한무장", title: "포시즌스 가든 유아휴게실 재정비", desc: "기저귀 교체, 온수 보충, 아이들 패딩·모자·담요·핫팩 야간 완전 무장" }
+        ]
+      },
+      {
+        category: "6. 야간 하이라이트 (19:00~21:00) 문라이트·불꽃",
+        items: [
+          { id: "t16", time: "19:00", tag: "인생샷", title: "야간 조명 켜진 회전목마 탑승", desc: "밤 조명이 켜졌을 때 가장 예쁨! 23개월 아기는 마차 좌석에 앉혀 탑승" },
+          { id: "t17", time: "19:30", tag: "하이라이트", title: "문라이트 퍼레이드 관람 (약 30분)", desc: "화려한 LED 행진! 시작 15분 전 회전목마~카니발광장 사이 길목 착석" },
+          { id: "t18", time: "20:30", tag: "탈출명당", title: "포시즌스 가든 불꽃놀이 (곤돌라 입구 쪽)", desc: "가든 깊숙이 가지 말고 스카이 크루즈(곤돌라) 탑승장 입구 근처에서 관람!" },
+          { id: "t19", time: "20:50", tag: "쾌속퇴장", title: "불꽃 피날레 직전 곤돌라 타고 정문 탈출", desc: "끝나고 움직이면 대기 40분! 마지막 연발 불꽃 터질 때 바로 곤돌라 탑승" }
+        ]
+      }
+    ];
+
+    const attractionsData = [
+      { category: "family", badge: "👨‍👩‍👧‍👦 4인 모두 무료", zone: "포시즌스 가든", name: "페스티벌 트레인 (꼬마기차)", height: "신장 제한 없음 (보호자 동반)", desc: "23개월 아기도 별도 이용권 없이 보호자 무릎/옆자리에 무료 탑승! 유모차는 탑승장 앞에 주차합니다." },
+      { category: "family", badge: "👨‍👩‍👧‍👦 4인 모두 무료", zone: "유러피언", name: "로얄 쥬빌리 캐로셀 (회전목마)", height: "신장 제한 없음 (100cm 미만 동반)", desc: "밤 7시에 조명이 켜졌을 때 타면 최고! 23개월 아기는 흔들리지 않는 마차 좌석에 함께 타면 안전합니다." },
+      { category: "family", badge: "👨‍👩‍👧‍👦 4인 모두 무료", zone: "주토피아", name: "사파리월드 · 로스트밸리 · 판다월드", height: "신장 제한 없음", desc: "오전 10시 입장 직후 스마트줄서기 필수! 36개월 미만 유아 동반 체크만 하면 온 가족 무료 관람." },
+      { category: "family", badge: "👨‍👩‍👧‍👦 4인 모두 무료", zone: "이동 수단", name: "스카이 크루즈(곤돌라) & 스카이웨이(리프트)", height: "신장 제한 없음", desc: "종일권 소지 시 무료! 곤돌라는 유모차를 접지 않고 그대로 태울 수 있어 밤 퇴장 시 필수입니다." },
+      { category: "first", badge: "👦 7살 첫째 추천", zone: "매직랜드/이솝", name: "비룡열차 & 레이싱 코스터", height: "비룡 110cm↑ / 레이싱 100cm↑", desc: "120cm 미만 7살 아이가 가장 신나게 탈 수 있는 입문용 롤러코스터! 둘째 낮잠 시간에 부모 1명이 전담 탑승." },
+      { category: "first", badge: "👦 7살 첫째 추천", zone: "매직랜드/아메리칸", name: "슈팅 고스트 & 콜럼버스 대탐험(바이킹)", height: "110cm 이상", desc: "실내 레이저 총쏘기(슈팅고스트)와 바이킹! 7살 아이 만족도가 가장 높은 인기 기구입니다." },
+      { category: "first", badge: "👦 7살 & 온가족", zone: "매직랜드", name: "플라잉 레스큐 · 피터팬 · 볼하우스", height: "90~100cm↑ (동반 시 유아 가능)", desc: "매직랜드에 모여 있어 오후 1시 반~3시 사이에 연속으로 도장깨기 좋습니다." },
+      { category: "second", badge: "👶 23개월(6천원권)", zone: "매직랜드", name: "붕붕카 · 자동차왕국 · 로보트카 (3종)", height: "유아 전용 라이드", desc: "36개월 미만 무료입장 아기가 탈 때 유일하게 '유아 전용 이용권(6,000원)'이 필요한 3종입니다. 미리 사지 말고 현장에서 아기가 타겠다고 할 때만 키오스크에서 발권하세요!" }
+    ];
+
+    const packingData = [
+      { id: "p1", title: "23개월 무료입장 증빙서류 (사진 가능)", desc: "등본, 가족관계증명서, 건강보험증 중 1개 휴대폰 사진 또는 정부24 앱" },
+      { id: "p2", title: "대용량 보조배터리 & 충전 케이블", desc: "스마트줄서기, 앱 확인, 사진/영상 촬영으로 배터리 소모 매우 빠름" },
+      { id: "p3", title: "유모차(또는 웨건) + 투명 방풍커버", desc: "11월 오후 칼바람 차단 및 불꽃놀이 화약 소음 완화용 필수템" },
+      { id: "p4", title: "무릎담요 2개 & 붙이는 핫팩", desc: "문라이트 퍼레이드 연석 대기 및 야간 유모차 보온용" },
+      { id: "p5", title: "아이들 패딩 · 비니 모자 · 목수건/장갑", desc: "오후 5시 이후 급격한 기온 하락 대비" },
+      { id: "p6", title: "23개월 이유식/유아식 & 보온병", desc: "이솝빌리지/가든 유아휴게실 전자레인지와 정수기 활용" },
+      { id: "p7", title: "대기 시간용 한입 간식 & 빨대컵 음료", desc: "사파리/퍼레이드 대기 중 아이들 칭얼거림 방지용" },
+      { id: "p8", title: "기저귀 넉넉히(6~8장) · 물티슈 · 여벌옷", desc: "11시간 풀코스 대비 넉넉하게 준비" }
+    ];
+
+    const KEY_TIME = "everland_fold_timeline_v2";
+    const KEY_PACK = "everland_fold_packing_v2";
+    const KEY_DARK = "everland_fold_dark_v2";
+
+    let checkedTimeline = JSON.parse(localStorage.getItem(KEY_TIME) || "{}");
+    let checkedPacking = JSON.parse(localStorage.getItem(KEY_PACK) || "{}");
+    let collapsedCats = {};
+    let timelineFilter = "all";
+    let attrFilter = "all";
+
+    function renderTimeline() {
+      const container = document.getElementById("timelineContainer");
+      container.innerHTML = "";
+
+      let total = 0, done = 0, visibleTotal = 0;
+
+      timelineData.forEach((group, idx) => {
+        let groupDone = 0;
+        group.items.forEach((it) => {
+          total++;
+          if (checkedTimeline[it.id]) {
+            done++;
+            groupDone++;
+          }
+        });
+
+        const filtered = group.items.filter((it) =>
+          timelineFilter === "remaining" ? !checkedTimeline[it.id] : true
+        );
+
+        if (filtered.length === 0) return;
+        visibleTotal += filtered.length;
+
+        const block = document.createElement("div");
+        block.id = "cat-block-" + idx;
+        block.className = "cat-block" + (collapsedCats[idx] ? " collapsed" : "");
+
+        const headerBtn = document.createElement("button");
+        headerBtn.type = "button";
+        headerBtn.className = "cat-header";
+        headerBtn.onclick = () => {
+          collapsedCats[idx] = !collapsedCats[idx];
+          renderTimeline();
+        };
+        headerBtn.innerHTML = `
+          <span>${collapsedCats[idx] ? "▶" : "▼"} ${group.category}</span>
+          <span class="cat-count">${groupDone}/${group.items.length}</span>
+        `;
+
+        const listDiv = document.createElement("div");
+        listDiv.className = "cat-items";
+
+        filtered.forEach((item) => {
+          const isDone = !!checkedTimeline[item.id];
+          const row = document.createElement("div");
+          row.className = "task-item" + (isDone ? " done" : "");
+          row.onclick = () => {
+            checkedTimeline[item.id] = !checkedTimeline[item.id];
+            localStorage.setItem(KEY_TIME, JSON.stringify(checkedTimeline));
+            renderTimeline();
+          };
+          row.innerHTML = `
+            <div class="chk-box">✓</div>
+            <div class="task-body">
+              <div class="task-meta">
+                <span class="time-badge">${item.time}</span>
+                <span class="tag-badge">${item.tag}</span>
+              </div>
+              <div class="task-title">${item.title}</div>
+              <div class="task-desc">${item.desc}</div>
+            </div>
+          `;
+          listDiv.appendChild(row);
+        });
+
+        block.appendChild(headerBtn);
+        block.appendChild(listDiv);
+        container.appendChild(block);
+      });
+
+      if (visibleTotal === 0) {
+        container.innerHTML = `
+          <div class="info-card" style="text-align:center; padding:24px 12px;">
+            <div style="font-size:32px; margin-bottom:6px;">🎉</div>
+            <h3 style="justify-content:center;">모든 일정을 완료했습니다!</h3>
+            <p style="margin-top:4px;">즐거운 에버랜드 추억 만드셨길 바랍니다.</p>
+          </div>
+        `;
+      }
+
+      const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+      document.getElementById("progressBar").style.width = pct + "%";
+      document.getElementById("progressText").textContent = `${done}/${total} (${pct}%)`;
+    }
+
+    function setTimelineFilter(mode) {
+      timelineFilter = mode;
+      document.getElementById("filter-all").className = "seg-btn" + (mode === "all" ? " active" : "");
+      document.getElementById("filter-rem").className = "seg-btn" + (mode === "remaining" ? " active" : "");
+      renderTimeline();
+    }
+
+    function toggleAllCategories() {
+      const anyOpen = timelineData.some((_, idx) => !collapsedCats[idx]);
+      timelineData.forEach((_, idx) => {
+        collapsedCats[idx] = anyOpen;
+      });
+      document.getElementById("fold-all-btn").textContent = anyOpen ? "구간펼치기" : "구간접기";
+      renderTimeline();
+    }
+
+    function jumpToCat(idx) {
+      collapsedCats[idx] = false;
+      renderTimeline();
+      const el = document.getElementById("cat-block-" + idx);
+      if (el) {
+        const y = el.getBoundingClientRect().top + window.pageYOffset - 74;
+        window.scrollTo({ top: y, behavior: "smooth" });
+      }
+    }
+
+    function renderAttractions() {
+      const container = document.getElementById("attractionsContainer");
+      container.innerHTML = "";
+      const list = attractionsData.filter((a) => (attrFilter === "all" ? true : a.category === attrFilter));
+      list.forEach((a) => {
+        const card = document.createElement("div");
+        card.className = "info-card";
+        card.innerHTML = `
+          <div class="badge-row">
+            <span class="summary-pill">${a.badge}</span>
+            <span class="zone-label">${a.zone}</span>
+          </div>
+          <h3>${a.name}</h3>
+          <div class="height-pill">📏 ${a.height}</div>
+          <p>${a.desc}</p>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function filterAttractions(cat) {
+      attrFilter = cat;
+      ["all", "family", "first", "second"].forEach((k) => {
+        const btn = document.getElementById("attr-" + k);
+        if (k === cat) {
+          btn.style.fontWeight = "900";
+          btn.style.borderColor = "var(--primary)";
+          btn.style.color = "var(--primary)";
+        } else {
+          btn.style.fontWeight = "700";
+          btn.style.borderColor = "var(--border)";
+          btn.style.color = "var(--sub)";
+        }
+      });
+      renderAttractions();
+    }
+
+    function renderPacking() {
+      const container = document.getElementById("packingContainer");
+      container.innerHTML = "";
+      let done = 0;
+      packingData.forEach((p) => {
+        const isDone = !!checkedPacking[p.id];
+        if (isDone) done++;
+        const row = document.createElement("div");
+        row.className = "task-item" + (isDone ? " done" : "");
+        row.onclick = () => {
+          checkedPacking[p.id] = !checkedPacking[p.id];
+          localStorage.setItem(KEY_PACK, JSON.stringify(checkedPacking));
+          renderPacking();
+        };
+        row.innerHTML = `
+          <div class="chk-box">✓</div>
+          <div class="task-body">
+            <div class="task-title">${p.title}</div>
+            <div class="task-desc">${p.desc}</div>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+      const badge = document.getElementById("packingBadge");
+      badge.textContent = `${done}/${packingData.length}`;
+      badge.style.background = done === packingData.length ? "var(--green)" : "var(--rose)";
+    }
+
+    function switchTab(tab) {
+      ["timeline", "attractions", "tips", "packing"].forEach((t) => {
+        document.getElementById("tab-" + t).classList.toggle("hidden", t !== tab);
+        document.getElementById("nav-" + t).classList.toggle("active", t === tab);
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function toggleDarkMode() {
+      const isDark = document.body.classList.toggle("dark-mode");
+      localStorage.setItem(KEY_DARK, isDark ? "1" : "0");
+      document.getElementById("darkBtn").textContent = isDark ? "☀️" : "🌙";
+    }
+
+    function openShareModal() {
+      document.getElementById("copyFeedback").style.display = "none";
+      document.getElementById("shareModal").classList.add("show");
+    }
+    function closeShareModal() {
+      document.getElementById("shareModal").classList.remove("show");
+    }
+    function openResetModal() {
+      document.getElementById("resetModal").classList.add("show");
+    }
+    function closeResetModal() {
+      document.getElementById("resetModal").classList.remove("show");
+    }
+    function confirmReset() {
+      checkedTimeline = {};
+      checkedPacking = {};
+      localStorage.removeItem(KEY_TIME);
+      localStorage.removeItem(KEY_PACK);
+      renderTimeline();
+      renderPacking();
+      closeResetModal();
+    }
+
+    function downloadStandaloneHTML() {
+      const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+      const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "에버랜드_4인가족_풀코스가이드.html";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function copyScheduleText() {
+      const lines = ["🎡 [에버랜드 4인 가족 풀코스 일정표]"];
+      timelineData.forEach((g) => {
+        lines.push("\n■ " + g.category);
+        g.items.forEach((it) => {
+          const mark = checkedTimeline[it.id] ? "[완료]" : "[ ]";
+          lines.push(`${mark} ${it.time} ${it.title}`);
+        });
+      });
+      const textArea = document.createElement("textarea");
+      textArea.value = lines.join("\n");
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      document.getElementById("copyFeedback").style.display = "block";
+    }
+
+    window.onload = function () {
+      if (localStorage.getItem(KEY_DARK) === "1") {
+        document.body.classList.add("dark-mode");
+        document.getElementById("darkBtn").textContent = "☀️";
+      }
+      renderTimeline();
+      renderAttractions();
+      renderPacking();
+    };
+  </script>
+</body></html>
